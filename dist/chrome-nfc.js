@@ -161,13 +161,13 @@ DevManager.prototype.dropDevice = function(dev) {
 
   if (dev.dev) {
     chrome.usb.releaseInterface(dev.dev, 0,
-        function() { console.log(NFC.util.fmt('released')); });
+        function() { NFC.util.log(NFC.util.fmt('released')); });
     chrome.usb.closeDevice(dev.dev,
-        function() { console.log(NFC.util.fmt('closed')); });
+        function() { NFC.util.log(NFC.util.fmt('closed')); });
     dev.dev = null;
   }
 
-  console.log(this.devs.length + ' devices remaining');
+  NFC.util.log(this.devs.length + ' devices remaining');
 };
 
 // Close all enumerated devices.
@@ -196,17 +196,17 @@ DevManager.prototype.enumerate = function(cb) {
     var nDevice = 0;
 
     if (d && d.length != 0) {
-      console.log(NFC.util.fmt('Enumerated ' + d.length + ' devices'));
-      console.log(d);
+      NFC.util.log(NFC.util.fmt('Enumerated ' + d.length + ' devices'));
+      NFC.util.log(d);
       nDevice = d.length;
     } else {
       if (d) {
-        console.log('No devices found');
+        NFC.util.log('No devices found');
       } else {
         /* TODO(yjlou): Review this case later (d==undefined).
          *              Is this real lacking permission.
          */
-        console.log('Lacking permission?');
+        NFC.util.log('Lacking permission?');
         do {
           (function(cb) {
             if (cb) window.setTimeout(function() { cb(-666); }, 0);
@@ -221,8 +221,8 @@ DevManager.prototype.enumerate = function(cb) {
       (function(dev, i) {
         window.setTimeout(function() {
             chrome.usb.claimInterface(dev, 0, function(result) {
-              console.log(NFC.util.fmt('claimed'));
-              console.log(dev);
+              NFC.util.log(NFC.util.fmt('claimed'));
+              NFC.util.log(dev);
 
               // Push the new low level device to the devs[].
               self.devs.push(new llSCL3711(dev, acr122));
@@ -324,7 +324,7 @@ DevManager.DevManager.defaultCallback = function(rc, data) {
   var msg = 'DevManager.defaultCallback('+rc;
   if (data) msg += ', ' + NFC.util.BytesToHex(new Uint8Array(data));
   msg += ')';
-  console.log(NFC.util.fmt(msg));
+  NFC.util.log(NFC.util.fmt(msg));
 };
 
 
@@ -529,14 +529,14 @@ MifareClassic.prototype.read = function(device, cb) {
 
   self.read_physical(device, 0, null, function(data) {
     for(var i = 0; i < Math.ceil(data.length / 16); i++) {
-      console.log(NFC.util.fmt("[DEBUG] Sector[" + NFC.util.BytesToHex([i]) + "] " +
+      NFC.util.log(NFC.util.fmt("[DEBUG] Sector[" + NFC.util.BytesToHex([i]) + "] " +
                   NFC.util.BytesToHex(data.subarray(i * 16,
                                                 i * 16 + 16))));
     }
 
     var GPB = data[0x39];  /* the first GPB */
     if (GPB == 0x69) {
-      console.log("[DEBUG] Sector 0 is non-personalized (0x69).");
+      NFC.util.log("[DEBUG] Sector 0 is non-personalized (0x69).");
     } else {
       var DA = (GPB & 0x80) >> 7;   // MAD available: 1 for yes.
       var MA = (GPB & 0x40) >> 6;   // Multiapplication card: 1 for yes.
@@ -557,22 +557,22 @@ MifareClassic.prototype.read = function(device, cb) {
       for (var i = 0; i < tlv.length; i++) {
         switch (tlv[i]) {
         case 0x00:  /* NULL */
-          console.log("[DEBUG] NULL TLV.");
+          NFC.util.log("[DEBUG] NULL TLV.");
           break;
         case 0xFE:  /* Terminator */
-          console.log("[DEBUG] Terminator TLV.");
+          NFC.util.log("[DEBUG] Terminator TLV.");
           return;
         case 0x03: /* NDEF */
           var len = tlv[i + 1];
           if ((len + 2) > tlv.length) {
-            console.log("[WARN] Vlen:" + len + " > totla len:" + tlv.length);
+            NFC.util.log("[WARN] Vlen:" + len + " > totla len:" + tlv.length);
           }
           return callback(0,
               new Uint8Array(tlv.subarray(i + 2, i + 2 + len)).buffer);
           /* TODO: now pass NDEF only. Support non-NDEF in the future. */
           // i += len + 1;
         default:
-          console.log("[ERROR] Unsupported TLV: " + NFC.util.BytesToHex(tlv[0]));
+          NFC.util.log("[ERROR] Unsupported TLV: " + NFC.util.BytesToHex(tlv[0]));
           return;
         }
       }
@@ -721,7 +721,7 @@ MifareClassic.prototype.write = function(device, ndef, cb) {
   var max_block = Math.ceil(card.length / 16);
 
   if (max_block > (1024 / 16)) {
-    console.log("write Classic() card is too big (max: 1024 bytes): " +
+    NFC.util.log("write Classic() card is too big (max: 1024 bytes): " +
                 card.length);
     return callback(0xbbb);
   }
@@ -912,18 +912,18 @@ NDEF.prototype.parse = function(raw, cb) {
                 raw.subarray(i + payload_off, i + payload_off + payload_len));
 
     if (1) {  /* for DEBUG */
-      console.log("raw[i]: " + raw[i]);
-      console.log("MB: " + MB);
-      console.log("ME: " + ME);
-      console.log("SR: " + SR);
-      console.log("IL: " + IL);
-      console.log("TNF: " + TNF);
-      console.log("type_off: " + type_off);
-      console.log("type_len: " + type_len);
-      console.log("payload_off: " + payload_off);
-      console.log("payload_len: " + payload_len);
-      console.log("type: " + NFC.util.BytesToHex(type));
-      console.log("payload: " + NFC.util.BytesToHex(payload));
+      NFC.util.log("raw[i]: " + raw[i]);
+      NFC.util.log("MB: " + MB);
+      NFC.util.log("ME: " + ME);
+      NFC.util.log("SR: " + SR);
+      NFC.util.log("IL: " + IL);
+      NFC.util.log("TNF: " + TNF);
+      NFC.util.log("type_off: " + type_off);
+      NFC.util.log("type_len: " + type_len);
+      NFC.util.log("payload_off: " + payload_off);
+      NFC.util.log("payload_len: " + payload_len);
+      NFC.util.log("type: " + NFC.util.BytesToHex(type));
+      NFC.util.log("payload: " + NFC.util.BytesToHex(payload));
     }
 
     switch (TNF) {
@@ -1072,7 +1072,7 @@ NDEF.prototype.add = function(d) {
     break;
 
   default:
-    console.log("Unsupported RTD type:" + d["type"]);
+    NFC.util.log("Unsupported RTD type:" + d["type"]);
     break;
   }
   return false;
@@ -1094,7 +1094,7 @@ NDEF.prototype.parse_RTD = function(type, rtd) {
   case 0x55:  /* 'U' */
     return this.parse_RTD_URI(rtd);
   default:
-    console.log("Unsupported RTD type: " + type);
+    NFC.util.log("Unsupported RTD type: " + type);
   }
 }
 
@@ -1280,11 +1280,11 @@ function NFC() {
 
     device.wait_for_passive_target(timeout, function(rc, tag_type, tag_id) {
       if (rc) {
-        console.log("NFC.wait_for_passive_target() = " + rc);
+        NFC.util.log("NFC.wait_for_passive_target() = " + rc);
         cb(rc);
         return rc;
       }
-      console.log("[DEBUG] nfc.wait_for_passive_target: " + tag_type + " with ID: " + NFC.util.BytesToHex(new Uint8Array(tag_id)));
+      NFC.util.log("[DEBUG] nfc.wait_for_passive_target: " + tag_type + " with ID: " + NFC.util.BytesToHex(new Uint8Array(tag_id)));
       cb(rc, tag_type, tag_id);
     });
   }
@@ -1302,7 +1302,7 @@ function NFC() {
     window.setTimeout(function() {
       device.open(0, function(rc) {
         if (rc) {
-          console.log("NFC.device.open() = " + rc);
+          NFC.util.log("NFC.device.open() = " + rc);
           cb([]);
           return rc;
         }
@@ -1339,13 +1339,13 @@ function NFC() {
     wait_for_passive_target(device, function(rc, tag_type, tag_id) {
       var tag = new Tag(tag_type, tag_id);
       if (!tag) {
-          console.log("nfc.read: unknown tag_type: " + tag_type);
+          NFC.util.log("nfc.read: unknown tag_type: " + tag_type);
           return;
       }
 
       tag.read(device, function(rc, ndef){
         if (rc) {
-          console.log("NFC.read.read() = " + rc);
+          NFC.util.log("NFC.read.read() = " + rc);
           callback(null, null);  /* no type reported */
           return rc;
         }
@@ -1364,11 +1364,11 @@ function NFC() {
     wait_for_passive_target(device, function(rc, tag_type, tag_id) {
       var tag = new Tag(tag_type, tag_id);
       if (!tag) {
-        console.log("nfc.read_logic: unknown tag_type: " + tag_type);
+        NFC.util.log("nfc.read_logic: unknown tag_type: " + tag_type);
         return;
       }
       if (!tag.read_logic) {
-        console.log("nfc.read: " + tag_type +
+        NFC.util.log("nfc.read: " + tag_type +
                     " doesn't support reading logic block");
         return;
       }
@@ -1418,7 +1418,7 @@ function NFC() {
     wait_for_passive_target(device, function(rc, tag_type, tag_id) {
       var tag = new Tag(tag_type, tag_id);
       if (!tag) {
-          console.log("nfc.write: unknown tag_type: " + tag_type);
+          NFC.util.log("nfc.write: unknown tag_type: " + tag_type);
           return;
       }
 
@@ -1441,12 +1441,12 @@ function NFC() {
     wait_for_passive_target(device, function(rc, tag_type, tag_id) {
       var tag = new Tag(tag_type, tag_id);
       if (!tag) {
-          console.log("nfc.write_logic: unknown tag_type: " + tag_type);
+          NFC.util.log("nfc.write_logic: unknown tag_type: " + tag_type);
           return;
       }
 
       if (!tag.write_logic) {
-        console.log("nfc.read: " + tag_type +
+        NFC.util.log("nfc.read: " + tag_type +
                     " doesn't support reading logic block");
         return;
       }
@@ -1470,12 +1470,12 @@ function NFC() {
     wait_for_passive_target(device, function(rc, tag_type, tag_id) {
       var tag = new Tag(tag_type, tag_id);
       if (!tag) {
-          console.log("nfc.write_physical: unknown tag_type: " + tag_type);
+          NFC.util.log("nfc.write_physical: unknown tag_type: " + tag_type);
           return;
       }
 
       if (!tag.write_physical) {
-        console.log("nfc.read: " + tag_type +
+        NFC.util.log("nfc.read: " + tag_type +
                     " doesn't support reading physical block");
         return;
       }
@@ -1654,7 +1654,7 @@ usbSCL3711.prototype.read = function(timeout, cb) {
   function read_timeout() {
     if (!callback || !tid) return;  // Already done.
 
-    console.log(NFC.util.fmt(
+    NFC.util.log(NFC.util.fmt(
         '[' + self.cid.toString(16) + '] timeout!'));
 
     tid = null;
@@ -1719,7 +1719,7 @@ usbSCL3711.prototype.read = function(timeout, cb) {
         if (f[7] == 0x00 /* status */) {
           schedule_cb(0, new Uint8Array(f.subarray(8, f.length - 2)).buffer);
         } else {
-          console.log("ERROR: InDataExchange reply status = " +
+          NFC.util.log("ERROR: InDataExchange reply status = " +
                       self.strerror(f[7]));
         }
         return;
@@ -1733,7 +1733,7 @@ usbSCL3711.prototype.read = function(timeout, cb) {
         if (f[7] == 0x00 /* Status */) {
           schedule_cb(0, new Uint8Array(f.subarray(8, f.length - 2)).buffer);
         } else {
-          console.log("ERROR: TgGetInitiatorCommand reply status = " +
+          NFC.util.log("ERROR: TgGetInitiatorCommand reply status = " +
                       self.strerror(f[7]));
         }
         return;
@@ -1742,7 +1742,7 @@ usbSCL3711.prototype.read = function(timeout, cb) {
         if (f[7] == 0x00 /* Status */) {
           schedule_cb(0, new Uint8Array(f.subarray(8, f.length - 2)).buffer);
         } else {
-          console.log("ERROR: TgResponseToInitiator reply status = " +
+          NFC.util.log("ERROR: TgResponseToInitiator reply status = " +
                       self.strerror(f[7]));
         }
         return;
@@ -1760,17 +1760,17 @@ usbSCL3711.prototype.read = function(timeout, cb) {
            * The database would return the corresponding TAG object.
            */
 
-          console.log("DEBUG: InListPassiveTarget SENS_REQ(ATQA)=0x" +
+          NFC.util.log("DEBUG: InListPassiveTarget SENS_REQ(ATQA)=0x" +
                       (f[9] * 256 + f[10]).toString(16) +
                       ", SEL_RES(SAK)=0x" + f[11].toString(16));
           var NFCIDLength = f[12];
           var tag_id = new Uint8Array(f.subarray(13, 13 + NFCIDLength)).buffer;
-          console.log("DEBUG: tag_id: " +
+          NFC.util.log("DEBUG: tag_id: " +
               NFC.util.BytesToHex(new Uint8Array(tag_id)));
 
           if (f[9] == 0x00 && f[10] == 0x44 /* SENS_RES */) {
             /* FIXME: not actually Ultralight. Only when tag_id[0]==0x04 */
-            console.log("DEBUG: found Mifare Ultralight (106k type A)");
+            NFC.util.log("DEBUG: found Mifare Ultralight (106k type A)");
             self.detected_tag = "Mifare Ultralight";
             self.authed_sector = null;
             self.auth_key = null;
@@ -1778,7 +1778,7 @@ usbSCL3711.prototype.read = function(timeout, cb) {
             return;
           } else if (f[9] == 0x00 && f[10] == 0x04 /* SENS_RES */) {
             /* FIXME: not actually Classic. Only when tag_id[0]==0x04 */
-            console.log("DEBUG: found Mifare Classic 1K (106k type A)");
+            NFC.util.log("DEBUG: found Mifare Classic 1K (106k type A)");
             self.detected_tag = "Mifare Classic 1K";
             self.authed_sector = null;
             self.auth_key = null;
@@ -1786,7 +1786,7 @@ usbSCL3711.prototype.read = function(timeout, cb) {
             return;
           }
         } else {
-          console.log("DEBUG: found " + f[7] + " target, tg=" + f[8]);
+          NFC.util.log("DEBUG: found " + f[7] + " target, tg=" + f[8]);
           return;
         }
       }
@@ -1831,7 +1831,7 @@ usbSCL3711.prototype.acr122_reset_to_good_state = function(cb) {
           if (rc) {
             console.warn("[FIXME] icc_power_on: rc = " + rc);
           }
-          console.log("[DEBUG] icc_power_on: turn on the device power");
+          NFC.util.log("[DEBUG] icc_power_on: turn on the device power");
           if (callback) window.setTimeout(function() { callback(0); }, 100);
       });
   });
@@ -1866,7 +1866,7 @@ usbSCL3711.prototype.acr122_load_authentication_keys = function(key, loc, cb) {
   u8 = NFC.util.concat(u8, key);
 
   self.exchange(u8.buffer, 1.0, function(rc, data) {
-      console.log("[DEBUG] acr122_load_authentication_keys(loc: " + loc +
+      NFC.util.log("[DEBUG] acr122_load_authentication_keys(loc: " + loc +
                   ", key: " + NFC.util.BytesToHex(key) + ") = " + rc);
       if (callback) callback(rc, data);
   });
@@ -1889,7 +1889,7 @@ usbSCL3711.prototype.acr122_authentication = function(block, loc, type, cb) {
           type,  /* Key type: TYPE A (0x60) or TYPE B (0x61) */ 
           loc    /* Key number (key location): 0 or 1 */
           ]).buffer, 1.0, function(rc, data) {
-    console.log("[DEBUG] acr122_authentication(loc: " + loc +
+    NFC.util.log("[DEBUG] acr122_authentication(loc: " + loc +
                 ", type: " + type + ", block: " + block + ") = " + rc);
     if (callback) callback(rc, data);
   });
@@ -1929,7 +1929,7 @@ usbSCL3711.prototype.publicAuthentication = function(block, cb) {
   if (self.detected_tag == "Mifare Classic 1K") {
     if (self.dev && self.dev.acr122) {
       if (self.authed_sector != sector) {
-        console.log("[DEBUG] Public Authenticate sector " + sector);
+        NFC.util.log("[DEBUG] Public Authenticate sector " + sector);
         try_keyA(0);
       } else {
         if (callback) callback(0, null);
@@ -1951,12 +1951,12 @@ usbSCL3711.prototype.privateAuthentication = function(block, key, cb) {
   if (self.detected_tag == "Mifare Classic 1K") {
     if (self.dev && self.dev.acr122) {
       if (self.authed_sector != sector) {
-        console.log("[DEBUG] Private Authenticate sector " + sector);
+        NFC.util.log("[DEBUG] Private Authenticate sector " + sector);
         self.acr122_load_authentication_keys(key, 1,
             function(rc, data) {
           self.acr122_authentication(block, 1, 0x61/*KEY B*/,
               function(rc, data) {
-            if (rc) { console.log("KEY B AUTH ERROR"); return rc; }
+            if (rc) { NFC.util.log("KEY B AUTH ERROR"); return rc; }
             if (callback) callback(rc, data);
           });
         });
@@ -1977,7 +1977,7 @@ usbSCL3711.prototype.acr122_set_timeout = function(timeout /* secs */, cb) {
 
   var unit = Math.ceil(timeout / 5);
   if (unit >= 0xff) unit = 0xff;
-  console.log("[DEBUG] acr122_set_timeout(round up to " + unit * 5 + " secs)");
+  NFC.util.log("[DEBUG] acr122_set_timeout(round up to " + unit * 5 + " secs)");
 
   self.exchange(new Uint8Array([
     0x6b, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -2186,7 +2186,7 @@ usbSCL3711.prototype.emulate_tag = function(data, timeout, cb) {
     switch (cmd[0]) {
     case 0x30:  /* READ */
       var blk_no = cmd[1];
-      console.log("recv TT2.READ(blk_no=" + blk_no + ")");
+      NFC.util.log("recv TT2.READ(blk_no=" + blk_no + ")");
       var ret = data.subarray(blk_no * 4, blk_no * 4 + 16);
       if (ret.length < 16) {
         ret = NFC.util.concat(ret, new Uint8Array(16 - ret.length));
@@ -2194,21 +2194,21 @@ usbSCL3711.prototype.emulate_tag = function(data, timeout, cb) {
       /* TgResponseToInitiator */
       var u8 = self.makeFrame(0x90, ret);
       self.exchange(u8, TIMEOUT, function(rc, data) {
-        if (rc) { console.log("exchange(): " + rc); return rc; }
+        if (rc) { NFC.util.log("exchange(): " + rc); return rc; }
         /* TgGetInitiatorCommand */
         var u8 = self.makeFrame(0x88, []);
         self.exchange(u8, TIMEOUT, function(rc, data) {
-          if (rc) { console.log("exchange(): " + rc); return rc; }
+          if (rc) { NFC.util.log("exchange(): " + rc); return rc; }
           HANDLE_TT2(new Uint8Array(data));
         });
       });
       break;
     case 0x50:  /* HALT */
-      console.log("recv TT2.HALT received.");
+      NFC.util.log("recv TT2.HALT received.");
       callback(0);
       break;
     default:
-      console.log("Unsupported TT2 tag: " + cmd[0]);
+      NFC.util.log("Unsupported TT2 tag: " + cmd[0]);
       callback(0x999);
     }
   }
@@ -2224,7 +2224,7 @@ usbSCL3711.prototype.emulate_tag = function(data, timeout, cb) {
     var u8 = self.makeFrame(0x8c, req);
     self.exchange(u8, TIMEOUT, function(rc, data) {
       if (rc != 0) { callback(rc); return; }
-      console.log("Emulated as a tag, reply is following:");
+      NFC.util.log("Emulated as a tag, reply is following:");
 
       HANDLE_TT2(new Uint8Array(data));
     });
@@ -2589,7 +2589,7 @@ TT2.prototype.read = function(device, cb) {
 
     /* TODO: support protocol other than NDEF */
     if (CC0 != 0xE1 || !check_ver(CC1) || !readable(CC3)) {
-      console.log("UNsupported type 2 tag: CC0=" + CC0 +
+      NFC.util.log("UNsupported type 2 tag: CC0=" + CC0 +
                                         ", CC1=" + CC1 +
                                         ", CC3=" + CC3);
       return callback(0x0777, data.buffer);
@@ -2600,7 +2600,7 @@ TT2.prototype.read = function(device, cb) {
     var block = 4;  // data starts from block 4
 
     function poll_block(card, block, poll_n) {
-      console.log("[DEBUG] poll_n: " + poll_n);
+      NFC.util.log("[DEBUG] poll_n: " + poll_n);
       if (--poll_n < 0) {
         DevManager.defaultCallback("[DEBUG] got a type 2 tag:", card.buffer);
 
@@ -2864,7 +2864,7 @@ llSCL3711.prototype.publishFrame = function(f) {
       remaining.push(client);
     } else {
       changes = true;
-      console.log(NFC.util.fmt(
+      NFC.util.log(NFC.util.fmt(
           '[' + client.cid.toString(16) + '] left?'));
     }
   }
@@ -2874,7 +2874,7 @@ llSCL3711.prototype.publishFrame = function(f) {
 llSCL3711.prototype.readLoop = function() {
   if (!this.dev) return;
 
-  // console.log(NFC.util.fmt('entering readLoop ' + this.dev.handle));
+  // NFC.util.log(NFC.util.fmt('entering readLoop ' + this.dev.handle));
 
   var self = this;
   chrome.usb.bulkTransfer(
@@ -2885,7 +2885,7 @@ llSCL3711.prototype.readLoop = function() {
         if (x.data.byteLength >= 5) {
 
           var u8 = new Uint8Array(x.data);
-          console.log(NFC.util.fmt('<' + NFC.util.BytesToHex(u8)));
+          NFC.util.log(NFC.util.fmt('<' + NFC.util.BytesToHex(u8)));
 
           self.publishFrame(x.data);
 
@@ -2900,8 +2900,8 @@ llSCL3711.prototype.readLoop = function() {
         }
 
       } else {
-        console.log('no x.data!');
-        console.log(x);
+        NFC.util.log('no x.data!');
+        NFC.util.log(x);
         throw 'no x.data!';
       }
     }
@@ -2942,7 +2942,7 @@ llSCL3711.prototype.writePump = function() {
   };
 
   var u8 = new Uint8Array(frame);
-  console.log(NFC.util.fmt('>' + NFC.util.BytesToHex(u8)));
+  NFC.util.log(NFC.util.fmt('>' + NFC.util.BytesToHex(u8)));
 
   chrome.usb.bulkTransfer(
       this.dev,
@@ -2982,22 +2982,25 @@ llSCL3711.prototype.writeFrame = function(frame) {
 
 'use strict';
 
-NFC.util = {
-  StringToBytes: function (s, bytes) {
+NFC.util = (function () {
+
+  var debugging = false;
+
+  this.StringToBytes = function (s, bytes) {
     bytes = bytes || new Array(s.length);
     for (var i = 0; i < s.length; ++i)
       bytes[i] = s.charCodeAt(i);
     return bytes;
-  },
+  };
 
-  BytesToString: function (b) {
+  this.BytesToString = function (b) {
     var tmp = new String();
     for (var i = 0; i < b.length; ++i)
       tmp += String.fromCharCode(b[i]);
     return tmp;
-  },
+  };
 
-  BytesToHex: function (b) {
+  this.BytesToHex = function (b) {
     if (!b) return '(null)';
     var hexchars = '0123456789ABCDEF';
     var hexrep = new Array(b.length * 2);
@@ -3007,9 +3010,9 @@ NFC.util = {
       hexrep[i * 2 + 1] = hexchars.charAt(b[i] & 15);
     }
     return hexrep.join('');
-  },
+  };
 
-  BytesToHexWithSeparator: function (b, sep) {
+  this.BytesToHexWithSeparator = function (b, sep) {
     var hexchars = '0123456789ABCDEF';
     var stride = 2 + (sep?1:0);
     var hexrep = new Array(b.length * stride);
@@ -3020,9 +3023,9 @@ NFC.util = {
       hexrep[i * stride + stride - 1] = hexchars.charAt(b[i] & 15);
     }
     return (sep?hexrep.slice(1):hexrep).join('');
-  },
+  };
 
-  HexToBytes: function (h) {
+  this.HexToBytes = function (h) {
     var hexchars = '0123456789ABCDEFabcdef';
     var res = new Uint8Array(h.length / 2);
     for (var i = 0; i < h.length; i += 2) {
@@ -3030,18 +3033,18 @@ NFC.util = {
       res[i / 2] = parseInt(h.substring(i, i + 2), 16);
     }
     return res;
-  },
+  };
 
-  equalArrays: function (a, b) {
+  this.equalArrays = function (a, b) {
     if (!a || !b) return false;
     if (a.length != b.length) return false;
     var accu = 0;
     for (var i = 0; i < a.length; ++i)
       accu |= a[i] ^ b[i];
     return accu === 0;
-  },
+  };
 
-  ltArrays: function (a, b) {
+  this.ltArrays = function (a, b) {
     if (a.length < b.length) return true;
     if (a.length > b.length) return false;
     for (var i = 0; i < a.length; ++i) {
@@ -3049,30 +3052,30 @@ NFC.util = {
       if (a[i] > b[i]) return false;
     }
     return false;
-  },
+  };
 
-  geArrays: function (a, b) {
+  this.geArrays = function (a, b) {
     return !NFC.util.ltArrays(a, b);
-  },
+  };
 
-  getRandom: function (a) {
+  this.getRandom = function (a) {
     var tmp = new Array(a);
     var rnd = new Uint8Array(a);
     window.crypto.getRandomValues(rnd);  // Yay!
     for (var i = 0; i < a; ++i) tmp[i] = rnd[i] & 255;
     return tmp;
-  },
+  };
 
-  equalArrays: function (a, b) {
+  this.equalArrays = function (a, b) {
     if (!a || !b) return false;
     if (a.length != b.length) return false;
     var accu = 0;
     for (var i = 0; i < a.length; ++i)
       accu |= a[i] ^ b[i];
     return accu === 0;
-  },
+  };
 
-  setFavicon: function (icon) {
+  this.setFavicon = function (icon) {
     // Construct a new favion link tag
     var faviconLink = document.createElement("link");
     faviconLink.rel = "Shortcut Icon";
@@ -3091,35 +3094,46 @@ NFC.util = {
 
     // Add in the new one
     head.appendChild(faviconLink);
-  },
+  };
 
   // Erase all entries in array
-  clear: function (a) {
+  this.clear = function (a) {
     if (a instanceof Array) {
       for (var i = 0; i < a.length; ++i)
         a[i] = 0;
     }
-  },
+  };
 
   // hr:min:sec.milli string
-  time: function () {
+  this.time = function () {
     var d = new Date();
     var m = '000' + d.getMilliseconds();
     var s = d.toTimeString().substring(0, 8) + '.' + m.substring(m.length - 3);
     return s;
-  },
+  };
 
-  fmt: function (s) {
+  this.fmt = function (s) {
     return NFC.util.time() + ' ' + s;
-  },
+  };
 
   // a and b are Uint8Array. Returns Uint8Array.
-  concat: function (a, b) {
+  this.concat = function (a, b) {
     var c = new Uint8Array(a.length + b.length);
     var i, n = 0;
     for (i = 0; i < a.length; i++, n++) c[n] = a[i];
     for (i = 0; i < b.length; i++, n++) c[n] = b[i];
     return c;
-  }
-};
+  };
 
+  this.log = function () {
+    if (debugging) console.log.apply(console, arguments);
+  };
+
+  this.debuggerOn = function () {
+    debugging = true;
+  };
+
+  this.debuggerOff = function () {
+    debugging = false;
+  };
+})();
