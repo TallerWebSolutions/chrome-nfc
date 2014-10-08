@@ -47,7 +47,7 @@ llSCL3711.prototype.close = function() {
   }
 
   // Tell global list to drop this device.
-  dev_manager.dropDevice(this);
+  devManager.dropDevice(this);
 };
 
 llSCL3711.prototype.publishFrame = function(f) {
@@ -94,7 +94,7 @@ llSCL3711.prototype.readLoop = function() {
           console.error(UTIL_fmt('tiny reply!'));
           console.error(x);
           // TODO(yjlou): I don't think a tiny reply requires close.
-          //              Maybe call dev_manager.close(null, clients[0])?
+          //              Maybe call devManager.close(null, clients[0])?
           // window.setTimeout(function() { self.close(); }, 0);
         }
 

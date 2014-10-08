@@ -43,13 +43,13 @@
 
 
 // List of enumerated usb devices.
-function devManager() {
+function DevManager() {
   this.devs = [];         // array storing the low level device.
   this.enumerators = [];  // array storing the pending callers of enumerate().
 }
 
 // Remove a device from devs[] list.
-devManager.prototype.dropDevice = function(dev) {
+DevManager.prototype.dropDevice = function(dev) {
   var tmp = this.devs;
   this.devs = [];
 
@@ -75,9 +75,9 @@ devManager.prototype.dropDevice = function(dev) {
 };
 
 // Close all enumerated devices.
-devManager.prototype.closeAll = function(cb) {
+DevManager.prototype.closeAll = function(cb) {
 
-  console.debug("devManager.closeAll() is called");
+  console.debug("DevManager.closeAll() is called");
 
   // First close and stop talking to any device we already
   // have enumerated.
@@ -93,7 +93,7 @@ devManager.prototype.closeAll = function(cb) {
 
 // When an app needs a device, it must claim before use (so that kernel
 // can handle the lock).
-devManager.prototype.enumerate = function(cb) {
+DevManager.prototype.enumerate = function(cb) {
   var self = this;
 
   function enumerated(d, acr122) {
@@ -191,7 +191,7 @@ devManager.prototype.enumerate = function(cb) {
   }
 };
 
-devManager.prototype.open = function(which, who, cb) {
+DevManager.prototype.open = function(which, who, cb) {
   var self = this;
   // Make sure we have enumerated devices.
   this.enumerate(function() {
@@ -201,7 +201,7 @@ devManager.prototype.open = function(which, who, cb) {
   });
 };
 
-devManager.prototype.close = function(singledev, who) {
+DevManager.prototype.close = function(singledev, who) {
   // De-register client from all known devices,
   // since the client might have opened them implicitly w/ enumerate().
   // This will thus release any device without active clients.
@@ -224,8 +224,8 @@ devManager.prototype.close = function(singledev, who) {
 // For console interaction.
 //  rc   - a number.
 //  data - an ArrayBuffer.
-var defaultCallback = function(rc, data) {
-  var msg = 'defaultCallback('+rc;
+DevManager.DevManager.defaultCallback = function(rc, data) {
+  var msg = 'DevManager.defaultCallback('+rc;
   if (data) msg += ', ' + UTIL_BytesToHex(new Uint8Array(data));
   msg += ')';
   console.log(UTIL_fmt(msg));
@@ -233,5 +233,5 @@ var defaultCallback = function(rc, data) {
 
 
 // Singleton tracking available devices.
-var dev_manager = new devManager();
+var devManager = new DevManager();
 
