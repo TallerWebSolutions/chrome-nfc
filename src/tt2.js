@@ -176,7 +176,7 @@ TT2.prototype.read = function(device, cb) {
 
       device.read_block(block, function(rc, bn) {
         if (rc) return callback(rc);
-        card = UTIL_concat(card, new Uint8Array(bn));
+        card = NFC.util.concat(card, new Uint8Array(bn));
         return poll_block(card, block + 4, poll_n);
       });
     }
@@ -237,10 +237,10 @@ TT2.prototype.compose = function(ndef) {
   var terminator_tlv = new Uint8Array([
     0xfe
   ]);
-  var ret = UTIL_concat(tt2_header, 
-            UTIL_concat(lock_control_tlv,
-            UTIL_concat(ndef_tlv,
-            UTIL_concat(new Uint8Array(ndef),
+  var ret = NFC.util.concat(tt2_header, 
+            NFC.util.concat(lock_control_tlv,
+            NFC.util.concat(ndef_tlv,
+            NFC.util.concat(new Uint8Array(ndef),
                         terminator_tlv))));
   return ret;
 }
@@ -272,7 +272,7 @@ TT2.prototype.write = function(device, ndef, cb) {
     if (block_no >= card_blknum) { return callback(0); }
 
 		var data = card.subarray(block_no * 4, block_no * 4 + 4);
-    if (data.length < 4) data = UTIL_concat(data,
+    if (data.length < 4) data = NFC.util.concat(data,
                                             new Uint8Array(4 - data.length));
 
     device.write_block(block_no, data, function(rc) {

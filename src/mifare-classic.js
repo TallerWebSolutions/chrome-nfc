@@ -172,7 +172,7 @@ MifareClassic.prototype.read_physical = function(device, phy_block, cnt, cb) {
           bn = self.copy_auth_keys(bn, dev);
         }
 
-        readed = UTIL_concat(readed, bn);
+        readed = NFC.util.concat(readed, bn);
 
         max_block = fast_read(blk_no, readed, max_block);
         if ((blk_no + 1)>= max_block)
@@ -195,8 +195,8 @@ MifareClassic.prototype.read = function(device, cb) {
 
   self.read_physical(device, 0, null, function(data) {
     for(var i = 0; i < Math.ceil(data.length / 16); i++) {
-      console.log(UTIL_fmt("[DEBUG] Sector[" + UTIL_BytesToHex([i]) + "] " +
-                  UTIL_BytesToHex(data.subarray(i * 16,
+      console.log(NFC.util.fmt("[DEBUG] Sector[" + NFC.util.BytesToHex([i]) + "] " +
+                  NFC.util.BytesToHex(data.subarray(i * 16,
                                                 i * 16 + 16))));
     }
 
@@ -216,7 +216,7 @@ MifareClassic.prototype.read = function(device, cb) {
            nfc_cnt++) {};
       var tlv = new Uint8Array();
       for(var i = 1; i <= nfc_cnt; i++) {
-        tlv = UTIL_concat(tlv, data.subarray(i * 0x40, i * 0x40 + 0x30));
+        tlv = NFC.util.concat(tlv, data.subarray(i * 0x40, i * 0x40 + 0x30));
       }
 
       // TODO: move to tlv.js
@@ -238,7 +238,7 @@ MifareClassic.prototype.read = function(device, cb) {
           /* TODO: now pass NDEF only. Support non-NDEF in the future. */
           // i += len + 1;
         default:
-          console.log("[ERROR] Unsupported TLV: " + UTIL_BytesToHex(tlv[0]));
+          console.log("[ERROR] Unsupported TLV: " + NFC.util.BytesToHex(tlv[0]));
           return;
         }
       }
@@ -257,7 +257,7 @@ MifareClassic.prototype.read_logic = function(device, logic_block, cnt, cb) {
     var count = cnt;
     if (count <= 0) return callback(card);
     self.read_physical(device, self.log2phy(logic_block), 1, function(data) {
-      card = UTIL_concat(card, data);
+      card = NFC.util.concat(card, data);
       next_logic(blk_no + 1, count - 1);
     });
   }
@@ -282,15 +282,15 @@ MifareClassic.prototype.compose = function(ndef) {
   var terminator_tlv = new Uint8Array([
     0xfe
   ]);
-  var TLV = UTIL_concat(ndef_tlv,
-            UTIL_concat(new Uint8Array(ndef),
+  var TLV = NFC.util.concat(ndef_tlv,
+            NFC.util.concat(new Uint8Array(ndef),
                         terminator_tlv));
 
   /* frag into sectors */
   var TLV_sector_num = Math.ceil(TLV.length / 0x30);
   var TLV_blocks = new Uint8Array();
   for (var i = 0; i < TLV_sector_num; i++) {
-    TLV_blocks = UTIL_concat(TLV_blocks,
+    TLV_blocks = NFC.util.concat(TLV_blocks,
                              TLV.subarray(i * 0x30, (i + 1) * 0x30));
 
     var padding;
@@ -299,8 +299,8 @@ MifareClassic.prototype.compose = function(ndef) {
     } else {
       padding = new Uint8Array(0);
     }
-    TLV_blocks = UTIL_concat(TLV_blocks, padding);
-    TLV_blocks = UTIL_concat(TLV_blocks, new Uint8Array([  // Sector Trailer
+    TLV_blocks = NFC.util.concat(TLV_blocks, padding);
+    TLV_blocks = NFC.util.concat(TLV_blocks, new Uint8Array([  // Sector Trailer
       0xd3, 0xf7, 0xd3, 0xf7, 0xd3, 0xf7,  // NFC pub key
       0x7f, 0x07, 0x88, 0x40,              // access bits, GPB
       0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,  // KEY B
@@ -336,7 +336,7 @@ MifareClassic.prototype.compose = function(ndef) {
   classic_header[0x10] =
       self.mif_calc_crc8(classic_header.subarray(0x11, 0x30));
 
-  var ret = UTIL_concat(classic_header, TLV_blocks);
+  var ret = NFC.util.concat(classic_header, TLV_blocks);
   return ret;
 }
 
@@ -356,7 +356,7 @@ MifareClassic.prototype.write_physical = function(device, block_no, key,
   if (data.length == 0) { return callback(0); }
   if (data.length < 16) {
     // Pad to 16 bytes
-    data = UTIL_concat(data, new Uint8Array(16 - data.length));
+    data = NFC.util.concat(data, new Uint8Array(16 - data.length));
   }
 
   function authenticationCallback (rc, dummy) {

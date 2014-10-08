@@ -63,7 +63,7 @@ llSCL3711.prototype.publishFrame = function(f) {
       remaining.push(client);
     } else {
       changes = true;
-      console.log(UTIL_fmt(
+      console.log(NFC.util.fmt(
           '[' + client.cid.toString(16) + '] left?'));
     }
   }
@@ -73,7 +73,7 @@ llSCL3711.prototype.publishFrame = function(f) {
 llSCL3711.prototype.readLoop = function() {
   if (!this.dev) return;
 
-  // console.log(UTIL_fmt('entering readLoop ' + this.dev.handle));
+  // console.log(NFC.util.fmt('entering readLoop ' + this.dev.handle));
 
   var self = this;
   chrome.usb.bulkTransfer(
@@ -84,14 +84,14 @@ llSCL3711.prototype.readLoop = function() {
         if (x.data.byteLength >= 5) {
 
           var u8 = new Uint8Array(x.data);
-          console.log(UTIL_fmt('<' + UTIL_BytesToHex(u8)));
+          console.log(NFC.util.fmt('<' + NFC.util.BytesToHex(u8)));
 
           self.publishFrame(x.data);
 
           // Read more.
           window.setTimeout(function() { self.readLoop(); } , 0);
         } else {
-          console.error(UTIL_fmt('tiny reply!'));
+          console.error(NFC.util.fmt('tiny reply!'));
           console.error(x);
           // TODO(yjlou): I don't think a tiny reply requires close.
           //              Maybe call devManager.close(null, clients[0])?
@@ -141,7 +141,7 @@ llSCL3711.prototype.writePump = function() {
   };
 
   var u8 = new Uint8Array(frame);
-  console.log(UTIL_fmt('>' + UTIL_BytesToHex(u8)));
+  console.log(NFC.util.fmt('>' + NFC.util.BytesToHex(u8)));
 
   chrome.usb.bulkTransfer(
       this.dev,

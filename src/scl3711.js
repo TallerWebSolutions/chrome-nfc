@@ -142,7 +142,7 @@ usbSCL3711.prototype.read = function(timeout, cb) {
   function read_timeout() {
     if (!callback || !tid) return;  // Already done.
 
-    console.log(UTIL_fmt(
+    console.log(NFC.util.fmt(
         '[' + self.cid.toString(16) + '] timeout!'));
 
     tid = null;
@@ -170,11 +170,11 @@ usbSCL3711.prototype.read = function(timeout, cb) {
     // Change the ACR122 response to SCL3711 format.
     if (f.length > 10) {
       if (f[0] == 0x80 /* RDR_to_PC_Datablock */) {
-        f = UTIL_concat(
+        f = NFC.util.concat(
               new Uint8Array([0x00, 0x00, 0xff, 0x01, 0xff]),
               new Uint8Array(f.subarray(10)));
       } else if (f[0] == 0x83 /* RDR_to_PC_Escape */) {
-        f = UTIL_concat(
+        f = NFC.util.concat(
               new Uint8Array([0x00, 0x00, 0xff, 0x01, 0xff]),
               new Uint8Array(f.subarray(10)));
       }
@@ -254,7 +254,7 @@ usbSCL3711.prototype.read = function(timeout, cb) {
           var NFCIDLength = f[12];
           var tag_id = new Uint8Array(f.subarray(13, 13 + NFCIDLength)).buffer;
           console.log("DEBUG: tag_id: " +
-              UTIL_BytesToHex(new Uint8Array(tag_id)));
+              NFC.util.BytesToHex(new Uint8Array(tag_id)));
 
           if (f[9] == 0x00 && f[10] == 0x44 /* SENS_RES */) {
             /* FIXME: not actually Ultralight. Only when tag_id[0]==0x04 */
@@ -351,11 +351,11 @@ usbSCL3711.prototype.acr122_load_authentication_keys = function(key, loc, cb) {
           0x00,  /* P1: Key Structure: volatile memory */
           loc,   /* P2: Key Number (key location): 0 or 1 */
           0x06]);/* Lc: 6 bytes */
-  u8 = UTIL_concat(u8, key);
+  u8 = NFC.util.concat(u8, key);
 
   self.exchange(u8.buffer, 1.0, function(rc, data) {
       console.log("[DEBUG] acr122_load_authentication_keys(loc: " + loc +
-                  ", key: " + UTIL_BytesToHex(key) + ") = " + rc);
+                  ", key: " + NFC.util.BytesToHex(key) + ") = " + rc);
       if (callback) callback(rc, data);
   });
 }
@@ -579,7 +579,7 @@ usbSCL3711.prototype.makeFrame = function(cmd, data) {
     a8[3] = 0x00;                            //   P2 (fixed 0)
     a8[4] = r8.length + 2;                   //   Lc (Number of Bytes to send)
 
-    h8 = UTIL_concat(c8, a8);
+    h8 = NFC.util.concat(c8, a8);
   } else {
     // scl3711
     var h8 = new Uint8Array(8);  // header
@@ -613,7 +613,7 @@ usbSCL3711.prototype.makeFrame = function(cmd, data) {
     chksum[1] = 0x00;
   }
 
-  return UTIL_concat(UTIL_concat(h8, p8), chksum).buffer;
+  return NFC.util.concat(NFC.util.concat(h8, p8), chksum).buffer;
 };
 
 
@@ -677,7 +677,7 @@ usbSCL3711.prototype.emulate_tag = function(data, timeout, cb) {
       console.log("recv TT2.READ(blk_no=" + blk_no + ")");
       var ret = data.subarray(blk_no * 4, blk_no * 4 + 16);
       if (ret.length < 16) {
-        ret = UTIL_concat(ret, new Uint8Array(16 - ret.length));
+        ret = NFC.util.concat(ret, new Uint8Array(16 - ret.length));
       }
       /* TgResponseToInitiator */
       var u8 = self.makeFrame(0x90, ret);
@@ -769,7 +769,7 @@ usbSCL3711.prototype.apdu = function(req, cb, write_only) {
 
   // Command 0x40 InDataExchange, our apdu as payload.
   var u8 = new Uint8Array(this.makeFrame(0x40,
-                                         UTIL_concat([0x01/*Tg*/], req)));
+                                         NFC.util.concat([0x01/*Tg*/], req)));
 
   // Write out in 64 bytes frames.
   for (var i = 0; i < u8.length; i += 64) {

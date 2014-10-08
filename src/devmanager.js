@@ -65,9 +65,9 @@ DevManager.prototype.dropDevice = function(dev) {
 
   if (dev.dev) {
     chrome.usb.releaseInterface(dev.dev, 0,
-        function() { console.log(UTIL_fmt('released')); });
+        function() { console.log(NFC.util.fmt('released')); });
     chrome.usb.closeDevice(dev.dev,
-        function() { console.log(UTIL_fmt('closed')); });
+        function() { console.log(NFC.util.fmt('closed')); });
     dev.dev = null;
   }
 
@@ -100,7 +100,7 @@ DevManager.prototype.enumerate = function(cb) {
     var nDevice = 0;
 
     if (d && d.length != 0) {
-      console.log(UTIL_fmt('Enumerated ' + d.length + ' devices'));
+      console.log(NFC.util.fmt('Enumerated ' + d.length + ' devices'));
       console.log(d);
       nDevice = d.length;
     } else {
@@ -125,7 +125,7 @@ DevManager.prototype.enumerate = function(cb) {
       (function(dev, i) {
         window.setTimeout(function() {
             chrome.usb.claimInterface(dev, 0, function(result) {
-              console.log(UTIL_fmt('claimed'));
+              console.log(NFC.util.fmt('claimed'));
               console.log(dev);
 
               // Push the new low level device to the devs[].
@@ -226,9 +226,9 @@ DevManager.prototype.close = function(singledev, who) {
 //  data - an ArrayBuffer.
 DevManager.DevManager.defaultCallback = function(rc, data) {
   var msg = 'DevManager.defaultCallback('+rc;
-  if (data) msg += ', ' + UTIL_BytesToHex(new Uint8Array(data));
+  if (data) msg += ', ' + NFC.util.BytesToHex(new Uint8Array(data));
   msg += ')';
-  console.log(UTIL_fmt(msg));
+  console.log(NFC.util.fmt(msg));
 };
 
 
