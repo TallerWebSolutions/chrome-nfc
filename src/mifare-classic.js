@@ -189,7 +189,7 @@ MifareClassic.prototype.read_physical = function(device, phy_block, cnt, cb) {
 // The callback is called with cb(NDEF Uint8Array).
 MifareClassic.prototype.read = function(device, cb) {
   var self = this;
-  if (!cb) cb = defaultCallback;
+  if (!cb) cb = DevManager.defaultCallback;
   var callback = cb;
   var card = new Uint8Array();
 
@@ -379,7 +379,7 @@ MifareClassic.prototype.write_physical = function(device, block_no, key,
 //   ndef: ArrayBuffer. Just ndef is needed. Classic header is handled.
 MifareClassic.prototype.write = function(device, ndef, cb) {
   var self = this;
-  if (!cb) cb = defaultCallback;
+  if (!cb) cb = DevManager.defaultCallback;
   var callback = cb;
   var card = self.compose(new Uint8Array(ndef));
   var dev = device;

@@ -484,7 +484,7 @@ usbSCL3711.prototype.open = function(which, cb, onclose) {
 
   var self = this;
   var callback = cb;
-  dev_manager.open(which, this, function(device) {
+  devManager.open(which, this, function(device) {
     self.dev = device;
     var result = (self.dev != null) ? 0 : 1;
 
@@ -527,7 +527,7 @@ usbSCL3711.prototype.close = function() {
   function dev_manager_close() {
     self.rxframes = null;  // So receivedFrame() will return false.
     if (self.dev) {
-      dev_manager.close(self.dev, self);
+      devManager.close(self.dev, self);
       self.dev = null;
     }
   }
@@ -621,7 +621,7 @@ usbSCL3711.prototype.makeFrame = function(cmd, data) {
 usbSCL3711.prototype.wait_for_passive_target = function(timeout, cb) {
   var self = this;
 
-  if (!cb) cb = defaultCallback;
+  if (!cb) cb = DevManager.defaultCallback;
 
   function InListPassiveTarget(timeout, cb) {
     self.detected_tag = null;
@@ -645,7 +645,7 @@ usbSCL3711.prototype.wait_for_passive_target = function(timeout, cb) {
 usbSCL3711.prototype.read_block = function(block, cb) {
   var self = this;
   var callback = cb;
-  if (!cb) cb = defaultCallback;
+  if (!cb) cb = DevManager.defaultCallback;
 
   /* function-wise variable */
   var u8 = new Uint8Array(2);  // Type 2 tag command
@@ -661,7 +661,7 @@ usbSCL3711.prototype.read_block = function(block, cb) {
 // Input:
 //  data: ArrayBuffer, the type 2 tag content.
 usbSCL3711.prototype.emulate_tag = function(data, timeout, cb) {
-  if (!cb) cb = defaultCallback;
+  if (!cb) cb = DevManager.defaultCallback;
   var callback = cb;
   var self = this;
   var TIMEOUT = timeout;
@@ -765,7 +765,7 @@ usbSCL3711.prototype.write_block = function(blk_no, data, cb, write_inst) {
 
 // Send apdu (0x40 -- InDataExchange), receive response.
 usbSCL3711.prototype.apdu = function(req, cb, write_only) {
-  if (!cb) cb = defaultCallback;
+  if (!cb) cb = DevManager.defaultCallback;
 
   // Command 0x40 InDataExchange, our apdu as payload.
   var u8 = new Uint8Array(this.makeFrame(0x40,

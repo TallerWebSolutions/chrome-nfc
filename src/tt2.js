@@ -56,7 +56,7 @@ TT2.prototype.detect_type_name = function(cb) {
 // The callback is called with cb(NDEF Uint8Array).
 TT2.prototype.read = function(device, cb) {
   var self = this;
-  if (!cb) cb = defaultCallback;
+  if (!cb) cb = DevManager.defaultCallback;
   var callback = cb;
 
   function poll_block0(rc, b0_b3) {
@@ -94,7 +94,7 @@ TT2.prototype.read = function(device, cb) {
     function poll_block(card, block, poll_n) {
       console.log("[DEBUG] poll_n: " + poll_n);
       if (--poll_n < 0) {
-        defaultCallback("[DEBUG] got a type 2 tag:", card.buffer);
+        DevManager.defaultCallback("[DEBUG] got a type 2 tag:", card.buffer);
 
         /* TODO: call tlv.js instead */
         /* TODO: now pass NDEF only. Support non-NDEF in the future. */
@@ -249,7 +249,7 @@ TT2.prototype.compose = function(ndef) {
 // Input:
 //   ndef: ArrayBuffer. Just ndef is needed. TT2 header is handled.
 TT2.prototype.write = function(device, ndef, cb) {
-  if (!cb) cb = defaultCallback;
+  if (!cb) cb = DevManager.defaultCallback;
 
   var self = this;
   var callback = cb;
