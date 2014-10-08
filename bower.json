@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "homepage": "https://github.com/TallerWebSolutions/chrome-nfc",
   "authors": [
+    "Google Inc.",
     "Lucas Constantino Silva <lucasconstantinosilva@gmail.com>"
   ],
   "description": "Chrome App NFC Library",
