@@ -16,22 +16,25 @@
 
 'use strict';
 
-NFC.util = {
-  StringToBytes: function (s, bytes) {
+NFC.util = (function () {
+
+  var debugging = false;
+
+  this.StringToBytes = function (s, bytes) {
     bytes = bytes || new Array(s.length);
     for (var i = 0; i < s.length; ++i)
       bytes[i] = s.charCodeAt(i);
     return bytes;
-  },
+  };
 
-  BytesToString: function (b) {
+  this.BytesToString = function (b) {
     var tmp = new String();
     for (var i = 0; i < b.length; ++i)
       tmp += String.fromCharCode(b[i]);
     return tmp;
-  },
+  };
 
-  BytesToHex: function (b) {
+  this.BytesToHex = function (b) {
     if (!b) return '(null)';
     var hexchars = '0123456789ABCDEF';
     var hexrep = new Array(b.length * 2);
@@ -41,9 +44,9 @@ NFC.util = {
       hexrep[i * 2 + 1] = hexchars.charAt(b[i] & 15);
     }
     return hexrep.join('');
-  },
+  };
 
-  BytesToHexWithSeparator: function (b, sep) {
+  this.BytesToHexWithSeparator = function (b, sep) {
     var hexchars = '0123456789ABCDEF';
     var stride = 2 + (sep?1:0);
     var hexrep = new Array(b.length * stride);
@@ -54,9 +57,9 @@ NFC.util = {
       hexrep[i * stride + stride - 1] = hexchars.charAt(b[i] & 15);
     }
     return (sep?hexrep.slice(1):hexrep).join('');
-  },
+  };
 
-  HexToBytes: function (h) {
+  this.HexToBytes = function (h) {
     var hexchars = '0123456789ABCDEFabcdef';
     var res = new Uint8Array(h.length / 2);
     for (var i = 0; i < h.length; i += 2) {
@@ -64,18 +67,18 @@ NFC.util = {
       res[i / 2] = parseInt(h.substring(i, i + 2), 16);
     }
     return res;
-  },
+  };
 
-  equalArrays: function (a, b) {
+  this.equalArrays = function (a, b) {
     if (!a || !b) return false;
     if (a.length != b.length) return false;
     var accu = 0;
     for (var i = 0; i < a.length; ++i)
       accu |= a[i] ^ b[i];
     return accu === 0;
-  },
+  };
 
-  ltArrays: function (a, b) {
+  this.ltArrays = function (a, b) {
     if (a.length < b.length) return true;
     if (a.length > b.length) return false;
     for (var i = 0; i < a.length; ++i) {
@@ -83,30 +86,30 @@ NFC.util = {
       if (a[i] > b[i]) return false;
     }
     return false;
-  },
+  };
 
-  geArrays: function (a, b) {
+  this.geArrays = function (a, b) {
     return !NFC.util.ltArrays(a, b);
-  },
+  };
 
-  getRandom: function (a) {
+  this.getRandom = function (a) {
     var tmp = new Array(a);
     var rnd = new Uint8Array(a);
     window.crypto.getRandomValues(rnd);  // Yay!
     for (var i = 0; i < a; ++i) tmp[i] = rnd[i] & 255;
     return tmp;
-  },
+  };
 
-  equalArrays: function (a, b) {
+  this.equalArrays = function (a, b) {
     if (!a || !b) return false;
     if (a.length != b.length) return false;
     var accu = 0;
     for (var i = 0; i < a.length; ++i)
       accu |= a[i] ^ b[i];
     return accu === 0;
-  },
+  };
 
-  setFavicon: function (icon) {
+  this.setFavicon = function (icon) {
     // Construct a new favion link tag
     var faviconLink = document.createElement("link");
     faviconLink.rel = "Shortcut Icon";
@@ -125,35 +128,46 @@ NFC.util = {
 
     // Add in the new one
     head.appendChild(faviconLink);
-  },
+  };
 
   // Erase all entries in array
-  clear: function (a) {
+  this.clear = function (a) {
     if (a instanceof Array) {
       for (var i = 0; i < a.length; ++i)
         a[i] = 0;
     }
-  },
+  };
 
   // hr:min:sec.milli string
-  time: function () {
+  this.time = function () {
     var d = new Date();
     var m = '000' + d.getMilliseconds();
     var s = d.toTimeString().substring(0, 8) + '.' + m.substring(m.length - 3);
     return s;
-  },
+  };
 
-  fmt: function (s) {
+  this.fmt = function (s) {
     return NFC.util.time() + ' ' + s;
-  },
+  };
 
   // a and b are Uint8Array. Returns Uint8Array.
-  concat: function (a, b) {
+  this.concat = function (a, b) {
     var c = new Uint8Array(a.length + b.length);
     var i, n = 0;
     for (i = 0; i < a.length; i++, n++) c[n] = a[i];
     for (i = 0; i < b.length; i++, n++) c[n] = b[i];
     return c;
-  }
-};
+  };
 
+  this.log = function () {
+    if (this.debug) console.log.apply(console, arguments);
+  };
+
+  this.debuggerOn = function () {
+    debugging = true;
+  };
+
+  this.debuggerOff = function () {
+    debugging = false;
+  };
+})();
