@@ -160,7 +160,7 @@ NFC.util = (function () {
   };
 
   this.log = function () {
-    if (this.debug) console.log.apply(console, arguments);
+    if (debugging) console.log.apply(console, arguments);
   };
 
   this.debuggerOn = function () {
