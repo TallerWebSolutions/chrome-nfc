@@ -142,7 +142,7 @@ usbSCL3711.prototype.read = function(timeout, cb) {
   function read_timeout() {
     if (!callback || !tid) return;  // Already done.
 
-    console.log(NFC.util.fmt(
+    NFC.util.log(NFC.util.fmt(
         '[' + self.cid.toString(16) + '] timeout!'));
 
     tid = null;
@@ -207,7 +207,7 @@ usbSCL3711.prototype.read = function(timeout, cb) {
         if (f[7] == 0x00 /* status */) {
           schedule_cb(0, new Uint8Array(f.subarray(8, f.length - 2)).buffer);
         } else {
-          console.log("ERROR: InDataExchange reply status = " +
+          NFC.util.log("ERROR: InDataExchange reply status = " +
                       self.strerror(f[7]));
         }
         return;
@@ -221,7 +221,7 @@ usbSCL3711.prototype.read = function(timeout, cb) {
         if (f[7] == 0x00 /* Status */) {
           schedule_cb(0, new Uint8Array(f.subarray(8, f.length - 2)).buffer);
         } else {
-          console.log("ERROR: TgGetInitiatorCommand reply status = " +
+          NFC.util.log("ERROR: TgGetInitiatorCommand reply status = " +
                       self.strerror(f[7]));
         }
         return;
@@ -230,7 +230,7 @@ usbSCL3711.prototype.read = function(timeout, cb) {
         if (f[7] == 0x00 /* Status */) {
           schedule_cb(0, new Uint8Array(f.subarray(8, f.length - 2)).buffer);
         } else {
-          console.log("ERROR: TgResponseToInitiator reply status = " +
+          NFC.util.log("ERROR: TgResponseToInitiator reply status = " +
                       self.strerror(f[7]));
         }
         return;
@@ -248,17 +248,17 @@ usbSCL3711.prototype.read = function(timeout, cb) {
            * The database would return the corresponding TAG object.
            */
 
-          console.log("DEBUG: InListPassiveTarget SENS_REQ(ATQA)=0x" +
+          NFC.util.log("DEBUG: InListPassiveTarget SENS_REQ(ATQA)=0x" +
                       (f[9] * 256 + f[10]).toString(16) +
                       ", SEL_RES(SAK)=0x" + f[11].toString(16));
           var NFCIDLength = f[12];
           var tag_id = new Uint8Array(f.subarray(13, 13 + NFCIDLength)).buffer;
-          console.log("DEBUG: tag_id: " +
+          NFC.util.log("DEBUG: tag_id: " +
               NFC.util.BytesToHex(new Uint8Array(tag_id)));
 
           if (f[9] == 0x00 && f[10] == 0x44 /* SENS_RES */) {
             /* FIXME: not actually Ultralight. Only when tag_id[0]==0x04 */
-            console.log("DEBUG: found Mifare Ultralight (106k type A)");
+            NFC.util.log("DEBUG: found Mifare Ultralight (106k type A)");
             self.detected_tag = "Mifare Ultralight";
             self.authed_sector = null;
             self.auth_key = null;
@@ -266,7 +266,7 @@ usbSCL3711.prototype.read = function(timeout, cb) {
             return;
           } else if (f[9] == 0x00 && f[10] == 0x04 /* SENS_RES */) {
             /* FIXME: not actually Classic. Only when tag_id[0]==0x04 */
-            console.log("DEBUG: found Mifare Classic 1K (106k type A)");
+            NFC.util.log("DEBUG: found Mifare Classic 1K (106k type A)");
             self.detected_tag = "Mifare Classic 1K";
             self.authed_sector = null;
             self.auth_key = null;
@@ -274,7 +274,7 @@ usbSCL3711.prototype.read = function(timeout, cb) {
             return;
           }
         } else {
-          console.log("DEBUG: found " + f[7] + " target, tg=" + f[8]);
+          NFC.util.log("DEBUG: found " + f[7] + " target, tg=" + f[8]);
           return;
         }
       }
@@ -319,7 +319,7 @@ usbSCL3711.prototype.acr122_reset_to_good_state = function(cb) {
           if (rc) {
             console.warn("[FIXME] icc_power_on: rc = " + rc);
           }
-          console.log("[DEBUG] icc_power_on: turn on the device power");
+          NFC.util.log("[DEBUG] icc_power_on: turn on the device power");
           if (callback) window.setTimeout(function() { callback(0); }, 100);
       });
   });
@@ -354,7 +354,7 @@ usbSCL3711.prototype.acr122_load_authentication_keys = function(key, loc, cb) {
   u8 = NFC.util.concat(u8, key);
 
   self.exchange(u8.buffer, 1.0, function(rc, data) {
-      console.log("[DEBUG] acr122_load_authentication_keys(loc: " + loc +
+      NFC.util.log("[DEBUG] acr122_load_authentication_keys(loc: " + loc +
                   ", key: " + NFC.util.BytesToHex(key) + ") = " + rc);
       if (callback) callback(rc, data);
   });
@@ -377,7 +377,7 @@ usbSCL3711.prototype.acr122_authentication = function(block, loc, type, cb) {
           type,  /* Key type: TYPE A (0x60) or TYPE B (0x61) */ 
           loc    /* Key number (key location): 0 or 1 */
           ]).buffer, 1.0, function(rc, data) {
-    console.log("[DEBUG] acr122_authentication(loc: " + loc +
+    NFC.util.log("[DEBUG] acr122_authentication(loc: " + loc +
                 ", type: " + type + ", block: " + block + ") = " + rc);
     if (callback) callback(rc, data);
   });
@@ -417,7 +417,7 @@ usbSCL3711.prototype.publicAuthentication = function(block, cb) {
   if (self.detected_tag == "Mifare Classic 1K") {
     if (self.dev && self.dev.acr122) {
       if (self.authed_sector != sector) {
-        console.log("[DEBUG] Public Authenticate sector " + sector);
+        NFC.util.log("[DEBUG] Public Authenticate sector " + sector);
         try_keyA(0);
       } else {
         if (callback) callback(0, null);
@@ -439,12 +439,12 @@ usbSCL3711.prototype.privateAuthentication = function(block, key, cb) {
   if (self.detected_tag == "Mifare Classic 1K") {
     if (self.dev && self.dev.acr122) {
       if (self.authed_sector != sector) {
-        console.log("[DEBUG] Private Authenticate sector " + sector);
+        NFC.util.log("[DEBUG] Private Authenticate sector " + sector);
         self.acr122_load_authentication_keys(key, 1,
             function(rc, data) {
           self.acr122_authentication(block, 1, 0x61/*KEY B*/,
               function(rc, data) {
-            if (rc) { console.log("KEY B AUTH ERROR"); return rc; }
+            if (rc) { NFC.util.log("KEY B AUTH ERROR"); return rc; }
             if (callback) callback(rc, data);
           });
         });
@@ -465,7 +465,7 @@ usbSCL3711.prototype.acr122_set_timeout = function(timeout /* secs */, cb) {
 
   var unit = Math.ceil(timeout / 5);
   if (unit >= 0xff) unit = 0xff;
-  console.log("[DEBUG] acr122_set_timeout(round up to " + unit * 5 + " secs)");
+  NFC.util.log("[DEBUG] acr122_set_timeout(round up to " + unit * 5 + " secs)");
 
   self.exchange(new Uint8Array([
     0x6b, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -674,7 +674,7 @@ usbSCL3711.prototype.emulate_tag = function(data, timeout, cb) {
     switch (cmd[0]) {
     case 0x30:  /* READ */
       var blk_no = cmd[1];
-      console.log("recv TT2.READ(blk_no=" + blk_no + ")");
+      NFC.util.log("recv TT2.READ(blk_no=" + blk_no + ")");
       var ret = data.subarray(blk_no * 4, blk_no * 4 + 16);
       if (ret.length < 16) {
         ret = NFC.util.concat(ret, new Uint8Array(16 - ret.length));
@@ -682,21 +682,21 @@ usbSCL3711.prototype.emulate_tag = function(data, timeout, cb) {
       /* TgResponseToInitiator */
       var u8 = self.makeFrame(0x90, ret);
       self.exchange(u8, TIMEOUT, function(rc, data) {
-        if (rc) { console.log("exchange(): " + rc); return rc; }
+        if (rc) { NFC.util.log("exchange(): " + rc); return rc; }
         /* TgGetInitiatorCommand */
         var u8 = self.makeFrame(0x88, []);
         self.exchange(u8, TIMEOUT, function(rc, data) {
-          if (rc) { console.log("exchange(): " + rc); return rc; }
+          if (rc) { NFC.util.log("exchange(): " + rc); return rc; }
           HANDLE_TT2(new Uint8Array(data));
         });
       });
       break;
     case 0x50:  /* HALT */
-      console.log("recv TT2.HALT received.");
+      NFC.util.log("recv TT2.HALT received.");
       callback(0);
       break;
     default:
-      console.log("Unsupported TT2 tag: " + cmd[0]);
+      NFC.util.log("Unsupported TT2 tag: " + cmd[0]);
       callback(0x999);
     }
   }
@@ -712,7 +712,7 @@ usbSCL3711.prototype.emulate_tag = function(data, timeout, cb) {
     var u8 = self.makeFrame(0x8c, req);
     self.exchange(u8, TIMEOUT, function(rc, data) {
       if (rc != 0) { callback(rc); return; }
-      console.log("Emulated as a tag, reply is following:");
+      NFC.util.log("Emulated as a tag, reply is following:");
 
       HANDLE_TT2(new Uint8Array(data));
     });

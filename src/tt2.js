@@ -81,7 +81,7 @@ TT2.prototype.read = function(device, cb) {
 
     /* TODO: support protocol other than NDEF */
     if (CC0 != 0xE1 || !check_ver(CC1) || !readable(CC3)) {
-      console.log("UNsupported type 2 tag: CC0=" + CC0 +
+      NFC.util.log("UNsupported type 2 tag: CC0=" + CC0 +
                                         ", CC1=" + CC1 +
                                         ", CC3=" + CC3);
       return callback(0x0777, data.buffer);
@@ -92,7 +92,7 @@ TT2.prototype.read = function(device, cb) {
     var block = 4;  // data starts from block 4
 
     function poll_block(card, block, poll_n) {
-      console.log("[DEBUG] poll_n: " + poll_n);
+      NFC.util.log("[DEBUG] poll_n: " + poll_n);
       if (--poll_n < 0) {
         DevManager.defaultCallback("[DEBUG] got a type 2 tag:", card.buffer);
 

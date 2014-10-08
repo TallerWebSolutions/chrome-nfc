@@ -195,14 +195,14 @@ MifareClassic.prototype.read = function(device, cb) {
 
   self.read_physical(device, 0, null, function(data) {
     for(var i = 0; i < Math.ceil(data.length / 16); i++) {
-      console.log(NFC.util.fmt("[DEBUG] Sector[" + NFC.util.BytesToHex([i]) + "] " +
+      NFC.util.log(NFC.util.fmt("[DEBUG] Sector[" + NFC.util.BytesToHex([i]) + "] " +
                   NFC.util.BytesToHex(data.subarray(i * 16,
                                                 i * 16 + 16))));
     }
 
     var GPB = data[0x39];  /* the first GPB */
     if (GPB == 0x69) {
-      console.log("[DEBUG] Sector 0 is non-personalized (0x69).");
+      NFC.util.log("[DEBUG] Sector 0 is non-personalized (0x69).");
     } else {
       var DA = (GPB & 0x80) >> 7;   // MAD available: 1 for yes.
       var MA = (GPB & 0x40) >> 6;   // Multiapplication card: 1 for yes.
@@ -223,22 +223,22 @@ MifareClassic.prototype.read = function(device, cb) {
       for (var i = 0; i < tlv.length; i++) {
         switch (tlv[i]) {
         case 0x00:  /* NULL */
-          console.log("[DEBUG] NULL TLV.");
+          NFC.util.log("[DEBUG] NULL TLV.");
           break;
         case 0xFE:  /* Terminator */
-          console.log("[DEBUG] Terminator TLV.");
+          NFC.util.log("[DEBUG] Terminator TLV.");
           return;
         case 0x03: /* NDEF */
           var len = tlv[i + 1];
           if ((len + 2) > tlv.length) {
-            console.log("[WARN] Vlen:" + len + " > totla len:" + tlv.length);
+            NFC.util.log("[WARN] Vlen:" + len + " > totla len:" + tlv.length);
           }
           return callback(0,
               new Uint8Array(tlv.subarray(i + 2, i + 2 + len)).buffer);
           /* TODO: now pass NDEF only. Support non-NDEF in the future. */
           // i += len + 1;
         default:
-          console.log("[ERROR] Unsupported TLV: " + NFC.util.BytesToHex(tlv[0]));
+          NFC.util.log("[ERROR] Unsupported TLV: " + NFC.util.BytesToHex(tlv[0]));
           return;
         }
       }
@@ -387,7 +387,7 @@ MifareClassic.prototype.write = function(device, ndef, cb) {
   var max_block = Math.ceil(card.length / 16);
 
   if (max_block > (1024 / 16)) {
-    console.log("write Classic() card is too big (max: 1024 bytes): " +
+    NFC.util.log("write Classic() card is too big (max: 1024 bytes): " +
                 card.length);
     return callback(0xbbb);
   }

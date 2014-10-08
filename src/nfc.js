@@ -37,11 +37,11 @@ function NFC() {
 
     device.wait_for_passive_target(timeout, function(rc, tag_type, tag_id) {
       if (rc) {
-        console.log("NFC.wait_for_passive_target() = " + rc);
+        NFC.util.log("NFC.wait_for_passive_target() = " + rc);
         cb(rc);
         return rc;
       }
-      console.log("[DEBUG] nfc.wait_for_passive_target: " + tag_type + " with ID: " + NFC.util.BytesToHex(new Uint8Array(tag_id)));
+      NFC.util.log("[DEBUG] nfc.wait_for_passive_target: " + tag_type + " with ID: " + NFC.util.BytesToHex(new Uint8Array(tag_id)));
       cb(rc, tag_type, tag_id);
     });
   }
@@ -59,7 +59,7 @@ function NFC() {
     window.setTimeout(function() {
       device.open(0, function(rc) {
         if (rc) {
-          console.log("NFC.device.open() = " + rc);
+          NFC.util.log("NFC.device.open() = " + rc);
           cb([]);
           return rc;
         }
@@ -96,13 +96,13 @@ function NFC() {
     wait_for_passive_target(device, function(rc, tag_type, tag_id) {
       var tag = new Tag(tag_type, tag_id);
       if (!tag) {
-          console.log("nfc.read: unknown tag_type: " + tag_type);
+          NFC.util.log("nfc.read: unknown tag_type: " + tag_type);
           return;
       }
 
       tag.read(device, function(rc, ndef){
         if (rc) {
-          console.log("NFC.read.read() = " + rc);
+          NFC.util.log("NFC.read.read() = " + rc);
           callback(null, null);  /* no type reported */
           return rc;
         }
@@ -121,11 +121,11 @@ function NFC() {
     wait_for_passive_target(device, function(rc, tag_type, tag_id) {
       var tag = new Tag(tag_type, tag_id);
       if (!tag) {
-        console.log("nfc.read_logic: unknown tag_type: " + tag_type);
+        NFC.util.log("nfc.read_logic: unknown tag_type: " + tag_type);
         return;
       }
       if (!tag.read_logic) {
-        console.log("nfc.read: " + tag_type +
+        NFC.util.log("nfc.read: " + tag_type +
                     " doesn't support reading logic block");
         return;
       }
@@ -175,7 +175,7 @@ function NFC() {
     wait_for_passive_target(device, function(rc, tag_type, tag_id) {
       var tag = new Tag(tag_type, tag_id);
       if (!tag) {
-          console.log("nfc.write: unknown tag_type: " + tag_type);
+          NFC.util.log("nfc.write: unknown tag_type: " + tag_type);
           return;
       }
 
@@ -198,12 +198,12 @@ function NFC() {
     wait_for_passive_target(device, function(rc, tag_type, tag_id) {
       var tag = new Tag(tag_type, tag_id);
       if (!tag) {
-          console.log("nfc.write_logic: unknown tag_type: " + tag_type);
+          NFC.util.log("nfc.write_logic: unknown tag_type: " + tag_type);
           return;
       }
 
       if (!tag.write_logic) {
-        console.log("nfc.read: " + tag_type +
+        NFC.util.log("nfc.read: " + tag_type +
                     " doesn't support reading logic block");
         return;
       }
@@ -227,12 +227,12 @@ function NFC() {
     wait_for_passive_target(device, function(rc, tag_type, tag_id) {
       var tag = new Tag(tag_type, tag_id);
       if (!tag) {
-          console.log("nfc.write_physical: unknown tag_type: " + tag_type);
+          NFC.util.log("nfc.write_physical: unknown tag_type: " + tag_type);
           return;
       }
 
       if (!tag.write_physical) {
-        console.log("nfc.read: " + tag_type +
+        NFC.util.log("nfc.read: " + tag_type +
                     " doesn't support reading physical block");
         return;
       }

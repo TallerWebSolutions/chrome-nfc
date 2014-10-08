@@ -63,7 +63,7 @@ llSCL3711.prototype.publishFrame = function(f) {
       remaining.push(client);
     } else {
       changes = true;
-      console.log(NFC.util.fmt(
+      NFC.util.log(NFC.util.fmt(
           '[' + client.cid.toString(16) + '] left?'));
     }
   }
@@ -73,7 +73,7 @@ llSCL3711.prototype.publishFrame = function(f) {
 llSCL3711.prototype.readLoop = function() {
   if (!this.dev) return;
 
-  // console.log(NFC.util.fmt('entering readLoop ' + this.dev.handle));
+  // NFC.util.log(NFC.util.fmt('entering readLoop ' + this.dev.handle));
 
   var self = this;
   chrome.usb.bulkTransfer(
@@ -84,7 +84,7 @@ llSCL3711.prototype.readLoop = function() {
         if (x.data.byteLength >= 5) {
 
           var u8 = new Uint8Array(x.data);
-          console.log(NFC.util.fmt('<' + NFC.util.BytesToHex(u8)));
+          NFC.util.log(NFC.util.fmt('<' + NFC.util.BytesToHex(u8)));
 
           self.publishFrame(x.data);
 
@@ -99,8 +99,8 @@ llSCL3711.prototype.readLoop = function() {
         }
 
       } else {
-        console.log('no x.data!');
-        console.log(x);
+        NFC.util.log('no x.data!');
+        NFC.util.log(x);
         throw 'no x.data!';
       }
     }
@@ -141,7 +141,7 @@ llSCL3711.prototype.writePump = function() {
   };
 
   var u8 = new Uint8Array(frame);
-  console.log(NFC.util.fmt('>' + NFC.util.BytesToHex(u8)));
+  NFC.util.log(NFC.util.fmt('>' + NFC.util.BytesToHex(u8)));
 
   chrome.usb.bulkTransfer(
       this.dev,

@@ -123,18 +123,18 @@ NDEF.prototype.parse = function(raw, cb) {
                 raw.subarray(i + payload_off, i + payload_off + payload_len));
 
     if (1) {  /* for DEBUG */
-      console.log("raw[i]: " + raw[i]);
-      console.log("MB: " + MB);
-      console.log("ME: " + ME);
-      console.log("SR: " + SR);
-      console.log("IL: " + IL);
-      console.log("TNF: " + TNF);
-      console.log("type_off: " + type_off);
-      console.log("type_len: " + type_len);
-      console.log("payload_off: " + payload_off);
-      console.log("payload_len: " + payload_len);
-      console.log("type: " + NFC.util.BytesToHex(type));
-      console.log("payload: " + NFC.util.BytesToHex(payload));
+      NFC.util.log("raw[i]: " + raw[i]);
+      NFC.util.log("MB: " + MB);
+      NFC.util.log("ME: " + ME);
+      NFC.util.log("SR: " + SR);
+      NFC.util.log("IL: " + IL);
+      NFC.util.log("TNF: " + TNF);
+      NFC.util.log("type_off: " + type_off);
+      NFC.util.log("type_len: " + type_len);
+      NFC.util.log("payload_off: " + payload_off);
+      NFC.util.log("payload_len: " + payload_len);
+      NFC.util.log("type: " + NFC.util.BytesToHex(type));
+      NFC.util.log("payload: " + NFC.util.BytesToHex(payload));
     }
 
     switch (TNF) {
@@ -283,7 +283,7 @@ NDEF.prototype.add = function(d) {
     break;
 
   default:
-    console.log("Unsupported RTD type:" + d["type"]);
+    NFC.util.log("Unsupported RTD type:" + d["type"]);
     break;
   }
   return false;
@@ -305,7 +305,7 @@ NDEF.prototype.parse_RTD = function(type, rtd) {
   case 0x55:  /* 'U' */
     return this.parse_RTD_URI(rtd);
   default:
-    console.log("Unsupported RTD type: " + type);
+    NFC.util.log("Unsupported RTD type: " + type);
   }
 }
 

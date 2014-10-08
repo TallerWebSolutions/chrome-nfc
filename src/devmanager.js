@@ -65,13 +65,13 @@ DevManager.prototype.dropDevice = function(dev) {
 
   if (dev.dev) {
     chrome.usb.releaseInterface(dev.dev, 0,
-        function() { console.log(NFC.util.fmt('released')); });
+        function() { NFC.util.log(NFC.util.fmt('released')); });
     chrome.usb.closeDevice(dev.dev,
-        function() { console.log(NFC.util.fmt('closed')); });
+        function() { NFC.util.log(NFC.util.fmt('closed')); });
     dev.dev = null;
   }
 
-  console.log(this.devs.length + ' devices remaining');
+  NFC.util.log(this.devs.length + ' devices remaining');
 };
 
 // Close all enumerated devices.
@@ -100,17 +100,17 @@ DevManager.prototype.enumerate = function(cb) {
     var nDevice = 0;
 
     if (d && d.length != 0) {
-      console.log(NFC.util.fmt('Enumerated ' + d.length + ' devices'));
-      console.log(d);
+      NFC.util.log(NFC.util.fmt('Enumerated ' + d.length + ' devices'));
+      NFC.util.log(d);
       nDevice = d.length;
     } else {
       if (d) {
-        console.log('No devices found');
+        NFC.util.log('No devices found');
       } else {
         /* TODO(yjlou): Review this case later (d==undefined).
          *              Is this real lacking permission.
          */
-        console.log('Lacking permission?');
+        NFC.util.log('Lacking permission?');
         do {
           (function(cb) {
             if (cb) window.setTimeout(function() { cb(-666); }, 0);
@@ -125,8 +125,8 @@ DevManager.prototype.enumerate = function(cb) {
       (function(dev, i) {
         window.setTimeout(function() {
             chrome.usb.claimInterface(dev, 0, function(result) {
-              console.log(NFC.util.fmt('claimed'));
-              console.log(dev);
+              NFC.util.log(NFC.util.fmt('claimed'));
+              NFC.util.log(dev);
 
               // Push the new low level device to the devs[].
               self.devs.push(new llSCL3711(dev, acr122));
@@ -228,7 +228,7 @@ DevManager.DevManager.defaultCallback = function(rc, data) {
   var msg = 'DevManager.defaultCallback('+rc;
   if (data) msg += ', ' + NFC.util.BytesToHex(new Uint8Array(data));
   msg += ')';
-  console.log(NFC.util.fmt(msg));
+  NFC.util.log(NFC.util.fmt(msg));
 };
 
 
