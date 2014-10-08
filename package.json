@@ -16,7 +16,10 @@
     "App",
     "NFC"
   ],
-  "author": "",
+  "author": "Google <Inc class=""></Inc>",
+  "contributors": [
+    "Lucas Constantino Silva <lucasconstantinosilva@gmail.com>"
+  ],
   "license": "Apache 2.0",
   "bugs": {
     "url": "https://github.com/TallerWebSolutions/chrome-nfc/issues"
