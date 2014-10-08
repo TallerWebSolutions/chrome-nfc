@@ -41,7 +41,7 @@ function NFC() {
         cb(rc);
         return rc;
       }
-      console.log("[DEBUG] nfc.wait_for_passive_target: " + tag_type + " with ID: " + UTIL_BytesToHex(new Uint8Array(tag_id)));
+      console.log("[DEBUG] nfc.wait_for_passive_target: " + tag_type + " with ID: " + NFC.util.BytesToHex(new Uint8Array(tag_id)));
       cb(rc, tag_type, tag_id);
     });
   }

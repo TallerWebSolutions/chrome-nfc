@@ -133,8 +133,8 @@ NDEF.prototype.parse = function(raw, cb) {
       console.log("type_len: " + type_len);
       console.log("payload_off: " + payload_off);
       console.log("payload_len: " + payload_len);
-      console.log("type: " + UTIL_BytesToHex(type));
-      console.log("payload: " + UTIL_BytesToHex(payload));
+      console.log("type: " + NFC.util.BytesToHex(type));
+      console.log("payload: " + NFC.util.BytesToHex(payload));
     }
 
     switch (TNF) {
@@ -192,12 +192,12 @@ NDEF.prototype.compose = function() {
       break;
     case "MIME":
       arr.push({"TNF": 2, 
-                "TYPE": new Uint8Array(UTIL_StringToBytes(entry["mime_type"])),
+                "TYPE": new Uint8Array(NFC.util.StringToBytes(entry["mime_type"])),
                 "PAYLOAD": this.compose_MIME(entry["payload"])});
       break;
     case "AAR":
       arr.push({"TNF": 4,
-                "TYPE": new Uint8Array(UTIL_StringToBytes('android.com:pkg')),
+                "TYPE": new Uint8Array(NFC.util.StringToBytes('android.com:pkg')),
                 "PAYLOAD": this.compose_AAR(entry["aar"])});
       break;
     default:
@@ -213,9 +213,9 @@ NDEF.prototype.compose = function() {
 
     var type = arr[i]["TYPE"];
     var payload = arr[i]["PAYLOAD"];
-    out = UTIL_concat(out, [flags, type.length, payload.length]);
-    out = UTIL_concat(out, type);
-    out = UTIL_concat(out, payload);
+    out = NFC.util.concat(out, [flags, type.length, payload.length]);
+    out = NFC.util.concat(out, type);
+    out = NFC.util.concat(out, payload);
   }
 
   return out.buffer;
@@ -320,8 +320,8 @@ NDEF.prototype.parse_RTD = function(type, rtd) {
  */
 NDEF.prototype.parse_MIME = function(mime_type, payload) {
   return {"type": "MIME",
-          "mime_type": UTIL_BytesToString(mime_type),
-          "payload": UTIL_BytesToString(payload)};
+          "mime_type": NFC.util.BytesToString(mime_type),
+          "payload": NFC.util.BytesToString(payload)};
 }
 
 
@@ -333,7 +333,7 @@ NDEF.prototype.parse_MIME = function(mime_type, payload) {
  *   rtd_text  -- Uint8Array.
  */
 NDEF.prototype.compose_MIME = function(payload) {
-  return new Uint8Array(UTIL_StringToBytes(payload));
+  return new Uint8Array(NFC.util.StringToBytes(payload));
 }
 
 
@@ -346,7 +346,7 @@ NDEF.prototype.compose_MIME = function(payload) {
  */
 NDEF.prototype.parse_AAR = function(payload) {
   return {"type": "AAR",
-          "payload": UTIL_BytesToString(payload)};
+          "payload": NFC.util.BytesToString(payload)};
 }
 
 /*
@@ -358,11 +358,11 @@ NDEF.prototype.parse_AAR = function(payload) {
  *   JS structure
  */
 NDEF.prototype.parse_ExternalType = function(type, payload) {
-  if (UTIL_BytesToString(type) == "android.com:pkg")
+  if (NFC.util.BytesToString(type) == "android.com:pkg")
     return this.parse_AAR(payload);
   else
     return {"type": type,
-            "payload": UTIL_BytesToString(payload)};
+            "payload": NFC.util.BytesToString(payload)};
 }
 
 
@@ -374,7 +374,7 @@ NDEF.prototype.parse_ExternalType = function(type, payload) {
  *   Uint8Array.
  */
 NDEF.prototype.compose_AAR = function(payload) {
-  return new Uint8Array(UTIL_StringToBytes(payload));
+  return new Uint8Array(NFC.util.StringToBytes(payload));
 }
 
 
@@ -393,8 +393,8 @@ NDEF.prototype.parse_RTD_TEXT = function(rtd_text) {
 
   return {"type": "Text",
           "encoding": utf16 ? "utf16" : "utf8",
-          "lang": UTIL_BytesToString(lang),
-          "text": UTIL_BytesToString(text)};
+          "lang": NFC.util.BytesToString(lang),
+          "text": NFC.util.BytesToString(text)};
 }
 
 
@@ -409,8 +409,8 @@ NDEF.prototype.compose_RTD_TEXT = function(lang, text) {
   var l = lang.length;
   l = (l > 0x3f) ? 0x3f : l;
   return new Uint8Array([l].concat(
-                        UTIL_StringToBytes(lang.substring(0, l))).concat(
-                        UTIL_StringToBytes(text)));
+                        NFC.util.StringToBytes(lang.substring(0, l))).concat(
+                        NFC.util.StringToBytes(text)));
 }
 
 
@@ -424,7 +424,7 @@ NDEF.prototype.compose_RTD_TEXT = function(lang, text) {
 NDEF.prototype.parse_RTD_URI = function(rtd_uri) {
   return {"type": "URI",
           "uri": this.prepending[rtd_uri[0]] +
-                 UTIL_BytesToString(rtd_uri.subarray(1, rtd_uri.length))};
+                 NFC.util.BytesToString(rtd_uri.subarray(1, rtd_uri.length))};
 }
 
 /*
@@ -448,6 +448,6 @@ NDEF.prototype.compose_RTD_URI = function(uri) {
   // assume at least longest_i matches prepending[0], which is "".
 
   return new Uint8Array([longest_i].concat(
-                        UTIL_StringToBytes(uri.substring(longest))));
+                        NFC.util.StringToBytes(uri.substring(longest))));
 }
 
