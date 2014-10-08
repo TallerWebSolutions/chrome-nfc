@@ -1,0 +1,28 @@
+{
+  "name": "chrome-nfc",
+  "version": "0.0.1",
+  "description": "Chrome App NFC Library",
+  "main": "dist/chrome-nfc.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TallerWebSolutions/chrome-nfc.git"
+  },
+  "keywords": [
+    "Chrome",
+    "Chrome",
+    "App",
+    "NFC"
+  ],
+  "author": "",
+  "license": "Apache 2.0",
+  "bugs": {
+    "url": "https://github.com/TallerWebSolutions/chrome-nfc/issues"
+  },
+  "homepage": "https://github.com/TallerWebSolutions/chrome-nfc",
+  "devDependencies": {
+    "gulp": "^3.8.8"
+  }
+}
