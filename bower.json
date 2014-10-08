@@ -1,0 +1,28 @@
+{
+  "name": "chrome-nfc",
+  "version": "0.0.1",
+  "homepage": "https://github.com/TallerWebSolutions/chrome-nfc",
+  "authors": [
+    "Lucas Constantino Silva <lucasconstantinosilva@gmail.com>"
+  ],
+  "description": "Chrome App NFC Library",
+  "main": "dist/chrome-nfc.js",
+  "keywords": [
+    "Chrome",
+    "Chrome",
+    "App",
+    "NFC"
+  ],
+  "license": "Apache 2.0",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "test",
+    "tests",
+    "sample",
+    "copyright-banner.txt",
+    "gulpfile.js",
+    "package.json",
+    "compile.py"
+  ]
+}
