@@ -224,7 +224,7 @@ DevManager.prototype.close = function(singledev, who) {
 // For console interaction.
 //  rc   - a number.
 //  data - an ArrayBuffer.
-DevManager.DevManager.defaultCallback = function(rc, data) {
+DevManager.defaultCallback = function(rc, data) {
   var msg = 'DevManager.defaultCallback('+rc;
   if (data) msg += ', ' + NFC.util.BytesToHex(new Uint8Array(data));
   msg += ')';

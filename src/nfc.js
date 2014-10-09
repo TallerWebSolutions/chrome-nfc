@@ -265,4 +265,4 @@ function NFC() {
   };
 }
 
-chrome.nfc = NFC();
+chrome.nfc = new NFC();
