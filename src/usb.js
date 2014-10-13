@@ -47,7 +47,7 @@ llSCL3711.prototype.close = function() {
   }
 
   // Tell global list to drop this device.
-  devManager.dropDevice(this);
+  dev_manager.dropDevice(this);
 };
 
 llSCL3711.prototype.publishFrame = function(f) {
@@ -63,7 +63,7 @@ llSCL3711.prototype.publishFrame = function(f) {
       remaining.push(client);
     } else {
       changes = true;
-      NFC.util.log(NFC.util.fmt(
+      console.log(UTIL_fmt(
           '[' + client.cid.toString(16) + '] left?'));
     }
   }
@@ -73,7 +73,7 @@ llSCL3711.prototype.publishFrame = function(f) {
 llSCL3711.prototype.readLoop = function() {
   if (!this.dev) return;
 
-  // NFC.util.log(NFC.util.fmt('entering readLoop ' + this.dev.handle));
+  // console.log(UTIL_fmt('entering readLoop ' + this.dev.handle));
 
   var self = this;
   chrome.usb.bulkTransfer(
@@ -84,23 +84,23 @@ llSCL3711.prototype.readLoop = function() {
         if (x.data.byteLength >= 5) {
 
           var u8 = new Uint8Array(x.data);
-          NFC.util.log(NFC.util.fmt('<' + NFC.util.BytesToHex(u8)));
+          console.log(UTIL_fmt('<' + UTIL_BytesToHex(u8)));
 
           self.publishFrame(x.data);
 
           // Read more.
           window.setTimeout(function() { self.readLoop(); } , 0);
         } else {
-          console.error(NFC.util.fmt('tiny reply!'));
+          console.error(UTIL_fmt('tiny reply!'));
           console.error(x);
           // TODO(yjlou): I don't think a tiny reply requires close.
-          //              Maybe call devManager.close(null, clients[0])?
+          //              Maybe call dev_manager.close(null, clients[0])?
           // window.setTimeout(function() { self.close(); }, 0);
         }
 
       } else {
-        NFC.util.log('no x.data!');
-        NFC.util.log(x);
+        console.log('no x.data!');
+        console.log(x);
         throw 'no x.data!';
       }
     }
@@ -141,7 +141,7 @@ llSCL3711.prototype.writePump = function() {
   };
 
   var u8 = new Uint8Array(frame);
-  NFC.util.log(NFC.util.fmt('>' + NFC.util.BytesToHex(u8)));
+  console.log(UTIL_fmt('>' + UTIL_BytesToHex(u8)));
 
   chrome.usb.bulkTransfer(
       this.dev,

@@ -172,7 +172,7 @@ MifareClassic.prototype.read_physical = function(device, phy_block, cnt, cb) {
           bn = self.copy_auth_keys(bn, dev);
         }
 
-        readed = NFC.util.concat(readed, bn);
+        readed = UTIL_concat(readed, bn);
 
         max_block = fast_read(blk_no, readed, max_block);
         if ((blk_no + 1)>= max_block)
@@ -189,20 +189,20 @@ MifareClassic.prototype.read_physical = function(device, phy_block, cnt, cb) {
 // The callback is called with cb(NDEF Uint8Array).
 MifareClassic.prototype.read = function(device, cb) {
   var self = this;
-  if (!cb) cb = DevManager.defaultCallback;
+  if (!cb) cb = defaultCallback;
   var callback = cb;
   var card = new Uint8Array();
 
   self.read_physical(device, 0, null, function(data) {
     for(var i = 0; i < Math.ceil(data.length / 16); i++) {
-      NFC.util.log(NFC.util.fmt("[DEBUG] Sector[" + NFC.util.BytesToHex([i]) + "] " +
-                  NFC.util.BytesToHex(data.subarray(i * 16,
+      console.log(UTIL_fmt("[DEBUG] Sector[" + UTIL_BytesToHex([i]) + "] " +
+                  UTIL_BytesToHex(data.subarray(i * 16,
                                                 i * 16 + 16))));
     }
 
     var GPB = data[0x39];  /* the first GPB */
     if (GPB == 0x69) {
-      NFC.util.log("[DEBUG] Sector 0 is non-personalized (0x69).");
+      console.log("[DEBUG] Sector 0 is non-personalized (0x69).");
     } else {
       var DA = (GPB & 0x80) >> 7;   // MAD available: 1 for yes.
       var MA = (GPB & 0x40) >> 6;   // Multiapplication card: 1 for yes.
@@ -216,29 +216,29 @@ MifareClassic.prototype.read = function(device, cb) {
            nfc_cnt++) {};
       var tlv = new Uint8Array();
       for(var i = 1; i <= nfc_cnt; i++) {
-        tlv = NFC.util.concat(tlv, data.subarray(i * 0x40, i * 0x40 + 0x30));
+        tlv = UTIL_concat(tlv, data.subarray(i * 0x40, i * 0x40 + 0x30));
       }
 
       // TODO: move to tlv.js
       for (var i = 0; i < tlv.length; i++) {
         switch (tlv[i]) {
         case 0x00:  /* NULL */
-          NFC.util.log("[DEBUG] NULL TLV.");
+          console.log("[DEBUG] NULL TLV.");
           break;
         case 0xFE:  /* Terminator */
-          NFC.util.log("[DEBUG] Terminator TLV.");
+          console.log("[DEBUG] Terminator TLV.");
           return;
         case 0x03: /* NDEF */
           var len = tlv[i + 1];
           if ((len + 2) > tlv.length) {
-            NFC.util.log("[WARN] Vlen:" + len + " > totla len:" + tlv.length);
+            console.log("[WARN] Vlen:" + len + " > totla len:" + tlv.length);
           }
           return callback(0,
               new Uint8Array(tlv.subarray(i + 2, i + 2 + len)).buffer);
           /* TODO: now pass NDEF only. Support non-NDEF in the future. */
           // i += len + 1;
         default:
-          NFC.util.log("[ERROR] Unsupported TLV: " + NFC.util.BytesToHex(tlv[0]));
+          console.log("[ERROR] Unsupported TLV: " + UTIL_BytesToHex(tlv[0]));
           return;
         }
       }
@@ -257,7 +257,7 @@ MifareClassic.prototype.read_logic = function(device, logic_block, cnt, cb) {
     var count = cnt;
     if (count <= 0) return callback(card);
     self.read_physical(device, self.log2phy(logic_block), 1, function(data) {
-      card = NFC.util.concat(card, data);
+      card = UTIL_concat(card, data);
       next_logic(blk_no + 1, count - 1);
     });
   }
@@ -282,15 +282,15 @@ MifareClassic.prototype.compose = function(ndef) {
   var terminator_tlv = new Uint8Array([
     0xfe
   ]);
-  var TLV = NFC.util.concat(ndef_tlv,
-            NFC.util.concat(new Uint8Array(ndef),
+  var TLV = UTIL_concat(ndef_tlv,
+            UTIL_concat(new Uint8Array(ndef),
                         terminator_tlv));
 
   /* frag into sectors */
   var TLV_sector_num = Math.ceil(TLV.length / 0x30);
   var TLV_blocks = new Uint8Array();
   for (var i = 0; i < TLV_sector_num; i++) {
-    TLV_blocks = NFC.util.concat(TLV_blocks,
+    TLV_blocks = UTIL_concat(TLV_blocks,
                              TLV.subarray(i * 0x30, (i + 1) * 0x30));
 
     var padding;
@@ -299,8 +299,8 @@ MifareClassic.prototype.compose = function(ndef) {
     } else {
       padding = new Uint8Array(0);
     }
-    TLV_blocks = NFC.util.concat(TLV_blocks, padding);
-    TLV_blocks = NFC.util.concat(TLV_blocks, new Uint8Array([  // Sector Trailer
+    TLV_blocks = UTIL_concat(TLV_blocks, padding);
+    TLV_blocks = UTIL_concat(TLV_blocks, new Uint8Array([  // Sector Trailer
       0xd3, 0xf7, 0xd3, 0xf7, 0xd3, 0xf7,  // NFC pub key
       0x7f, 0x07, 0x88, 0x40,              // access bits, GPB
       0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,  // KEY B
@@ -336,7 +336,7 @@ MifareClassic.prototype.compose = function(ndef) {
   classic_header[0x10] =
       self.mif_calc_crc8(classic_header.subarray(0x11, 0x30));
 
-  var ret = NFC.util.concat(classic_header, TLV_blocks);
+  var ret = UTIL_concat(classic_header, TLV_blocks);
   return ret;
 }
 
@@ -356,7 +356,7 @@ MifareClassic.prototype.write_physical = function(device, block_no, key,
   if (data.length == 0) { return callback(0); }
   if (data.length < 16) {
     // Pad to 16 bytes
-    data = NFC.util.concat(data, new Uint8Array(16 - data.length));
+    data = UTIL_concat(data, new Uint8Array(16 - data.length));
   }
 
   function authenticationCallback (rc, dummy) {
@@ -379,7 +379,7 @@ MifareClassic.prototype.write_physical = function(device, block_no, key,
 //   ndef: ArrayBuffer. Just ndef is needed. Classic header is handled.
 MifareClassic.prototype.write = function(device, ndef, cb) {
   var self = this;
-  if (!cb) cb = DevManager.defaultCallback;
+  if (!cb) cb = defaultCallback;
   var callback = cb;
   var card = self.compose(new Uint8Array(ndef));
   var dev = device;
@@ -387,7 +387,7 @@ MifareClassic.prototype.write = function(device, ndef, cb) {
   var max_block = Math.ceil(card.length / 16);
 
   if (max_block > (1024 / 16)) {
-    NFC.util.log("write Classic() card is too big (max: 1024 bytes): " +
+    console.log("write Classic() card is too big (max: 1024 bytes): " +
                 card.length);
     return callback(0xbbb);
   }

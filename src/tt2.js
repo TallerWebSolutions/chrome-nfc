@@ -56,7 +56,7 @@ TT2.prototype.detect_type_name = function(cb) {
 // The callback is called with cb(NDEF Uint8Array).
 TT2.prototype.read = function(device, cb) {
   var self = this;
-  if (!cb) cb = DevManager.defaultCallback;
+  if (!cb) cb = defaultCallback;
   var callback = cb;
 
   function poll_block0(rc, b0_b3) {
@@ -81,7 +81,7 @@ TT2.prototype.read = function(device, cb) {
 
     /* TODO: support protocol other than NDEF */
     if (CC0 != 0xE1 || !check_ver(CC1) || !readable(CC3)) {
-      NFC.util.log("UNsupported type 2 tag: CC0=" + CC0 +
+      console.log("UNsupported type 2 tag: CC0=" + CC0 +
                                         ", CC1=" + CC1 +
                                         ", CC3=" + CC3);
       return callback(0x0777, data.buffer);
@@ -92,9 +92,9 @@ TT2.prototype.read = function(device, cb) {
     var block = 4;  // data starts from block 4
 
     function poll_block(card, block, poll_n) {
-      NFC.util.log("[DEBUG] poll_n: " + poll_n);
+      console.log("[DEBUG] poll_n: " + poll_n);
       if (--poll_n < 0) {
-        DevManager.defaultCallback("[DEBUG] got a type 2 tag:", card.buffer);
+        defaultCallback("[DEBUG] got a type 2 tag:", card.buffer);
 
         /* TODO: call tlv.js instead */
         /* TODO: now pass NDEF only. Support non-NDEF in the future. */
@@ -176,7 +176,7 @@ TT2.prototype.read = function(device, cb) {
 
       device.read_block(block, function(rc, bn) {
         if (rc) return callback(rc);
-        card = NFC.util.concat(card, new Uint8Array(bn));
+        card = UTIL_concat(card, new Uint8Array(bn));
         return poll_block(card, block + 4, poll_n);
       });
     }
@@ -237,10 +237,10 @@ TT2.prototype.compose = function(ndef) {
   var terminator_tlv = new Uint8Array([
     0xfe
   ]);
-  var ret = NFC.util.concat(tt2_header, 
-            NFC.util.concat(lock_control_tlv,
-            NFC.util.concat(ndef_tlv,
-            NFC.util.concat(new Uint8Array(ndef),
+  var ret = UTIL_concat(tt2_header, 
+            UTIL_concat(lock_control_tlv,
+            UTIL_concat(ndef_tlv,
+            UTIL_concat(new Uint8Array(ndef),
                         terminator_tlv))));
   return ret;
 }
@@ -249,7 +249,7 @@ TT2.prototype.compose = function(ndef) {
 // Input:
 //   ndef: ArrayBuffer. Just ndef is needed. TT2 header is handled.
 TT2.prototype.write = function(device, ndef, cb) {
-  if (!cb) cb = DevManager.defaultCallback;
+  if (!cb) cb = defaultCallback;
 
   var self = this;
   var callback = cb;
@@ -272,7 +272,7 @@ TT2.prototype.write = function(device, ndef, cb) {
     if (block_no >= card_blknum) { return callback(0); }
 
 		var data = card.subarray(block_no * 4, block_no * 4 + 4);
-    if (data.length < 4) data = NFC.util.concat(data,
+    if (data.length < 4) data = UTIL_concat(data,
                                             new Uint8Array(4 - data.length));
 
     device.write_block(block_no, data, function(rc) {

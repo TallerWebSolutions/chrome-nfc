@@ -43,13 +43,13 @@
 
 
 // List of enumerated usb devices.
-function DevManager() {
+function devManager() {
   this.devs = [];         // array storing the low level device.
   this.enumerators = [];  // array storing the pending callers of enumerate().
 }
 
 // Remove a device from devs[] list.
-DevManager.prototype.dropDevice = function(dev) {
+devManager.prototype.dropDevice = function(dev) {
   var tmp = this.devs;
   this.devs = [];
 
@@ -65,19 +65,19 @@ DevManager.prototype.dropDevice = function(dev) {
 
   if (dev.dev) {
     chrome.usb.releaseInterface(dev.dev, 0,
-        function() { NFC.util.log(NFC.util.fmt('released')); });
+        function() { console.log(UTIL_fmt('released')); });
     chrome.usb.closeDevice(dev.dev,
-        function() { NFC.util.log(NFC.util.fmt('closed')); });
+        function() { console.log(UTIL_fmt('closed')); });
     dev.dev = null;
   }
 
-  NFC.util.log(this.devs.length + ' devices remaining');
+  console.log(this.devs.length + ' devices remaining');
 };
 
 // Close all enumerated devices.
-DevManager.prototype.closeAll = function(cb) {
+devManager.prototype.closeAll = function(cb) {
 
-  console.debug("DevManager.closeAll() is called");
+  console.debug("devManager.closeAll() is called");
 
   // First close and stop talking to any device we already
   // have enumerated.
@@ -93,24 +93,24 @@ DevManager.prototype.closeAll = function(cb) {
 
 // When an app needs a device, it must claim before use (so that kernel
 // can handle the lock).
-DevManager.prototype.enumerate = function(cb) {
+devManager.prototype.enumerate = function(cb) {
   var self = this;
 
   function enumerated(d, acr122) {
     var nDevice = 0;
 
     if (d && d.length != 0) {
-      NFC.util.log(NFC.util.fmt('Enumerated ' + d.length + ' devices'));
-      NFC.util.log(d);
+      console.log(UTIL_fmt('Enumerated ' + d.length + ' devices'));
+      console.log(d);
       nDevice = d.length;
     } else {
       if (d) {
-        NFC.util.log('No devices found');
+        console.log('No devices found');
       } else {
         /* TODO(yjlou): Review this case later (d==undefined).
          *              Is this real lacking permission.
          */
-        NFC.util.log('Lacking permission?');
+        console.log('Lacking permission?');
         do {
           (function(cb) {
             if (cb) window.setTimeout(function() { cb(-666); }, 0);
@@ -125,8 +125,8 @@ DevManager.prototype.enumerate = function(cb) {
       (function(dev, i) {
         window.setTimeout(function() {
             chrome.usb.claimInterface(dev, 0, function(result) {
-              NFC.util.log(NFC.util.fmt('claimed'));
-              NFC.util.log(dev);
+              console.log(UTIL_fmt('claimed'));
+              console.log(dev);
 
               // Push the new low level device to the devs[].
               self.devs.push(new llSCL3711(dev, acr122));
@@ -191,7 +191,7 @@ DevManager.prototype.enumerate = function(cb) {
   }
 };
 
-DevManager.prototype.open = function(which, who, cb) {
+devManager.prototype.open = function(which, who, cb) {
   var self = this;
   // Make sure we have enumerated devices.
   this.enumerate(function() {
@@ -201,7 +201,7 @@ DevManager.prototype.open = function(which, who, cb) {
   });
 };
 
-DevManager.prototype.close = function(singledev, who) {
+devManager.prototype.close = function(singledev, who) {
   // De-register client from all known devices,
   // since the client might have opened them implicitly w/ enumerate().
   // This will thus release any device without active clients.
@@ -224,14 +224,14 @@ DevManager.prototype.close = function(singledev, who) {
 // For console interaction.
 //  rc   - a number.
 //  data - an ArrayBuffer.
-DevManager.defaultCallback = function(rc, data) {
-  var msg = 'DevManager.defaultCallback('+rc;
-  if (data) msg += ', ' + NFC.util.BytesToHex(new Uint8Array(data));
+var defaultCallback = function(rc, data) {
+  var msg = 'defaultCallback('+rc;
+  if (data) msg += ', ' + UTIL_BytesToHex(new Uint8Array(data));
   msg += ')';
-  NFC.util.log(NFC.util.fmt(msg));
+  console.log(UTIL_fmt(msg));
 };
 
 
 // Singleton tracking available devices.
-var devManager = new DevManager();
+var dev_manager = new devManager();
 
